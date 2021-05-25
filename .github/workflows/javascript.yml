@@ -1,0 +1,35 @@
+name: javascript
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Detect node version
+        id: node-version
+        run: echo "::set-output name=NODE_VERSION::$(cat .node-version)"
+      - name: Setup node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "${{ steps.node-version.outputs.NODE_VERSION }}"
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./node_modules
+          key: yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+            yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-
+            yarn-${{ runner.os }}-
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Run test
+        run: yarn test

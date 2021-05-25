@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JSX should catch error syntax error 1`] = `"Unexpected token (1:9)"`;
+
+exports[`JSX should catch error with number object 1`] = `"1"`;
+
+exports[`JSX should catch error with object 1`] = `"[object Object]"`;
+
+exports[`JSX should render JSX 1`] = `
+Array [
+  "
+      ",
+  <h1>
+    Hello, JSX World
+  </h1>,
+  "
+      ",
+  <p>
+    This is paragraph.
+  </p>,
+  "
+      ",
+  <ul
+    className="Hello"
+  >
+    
+        
+    <li>
+      first
+    </li>
+    
+        
+    <li>
+      second
+    </li>
+    
+      
+  </ul>,
+  "
+      ",
+  "Fragment",
+  "
+    ",
+]
+`;
