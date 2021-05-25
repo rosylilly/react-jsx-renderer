@@ -4,8 +4,8 @@
 /.github
 /coverage
 /example
+/jest.config.js
 /node_modules
-jest.config.js
-tsconfig.json
-webpack.config.mjs
-yarn.lock
+/tsconfig.json
+/webpack.config.mjs
+/yarn.lock
