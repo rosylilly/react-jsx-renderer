@@ -1,11 +1,28 @@
 # React JSX Renderer
 
+[![demo](https://img.shields.io/badge/LIVE%20DEMO-available-success)](https://aduca.org/react-jsx-renderer/)
 [![npm version](https://img.shields.io/npm/v/react-jsx-renderer.svg)](https://www.npmjs.org/package/react-jsx-renderer)
 [![CI status](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/javascript.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/javascript.yml)
 [![Coverage Status](https://coveralls.io/repos/github/rosylilly/react-jsx-renderer/badge.svg?branch=refs/heads/main)](https://coveralls.io/github/rosylilly/react-jsx-renderer?branch=refs/heads/main)
 [![Dependencies Status](https://status.david-dm.org/gh/rosylilly/react-jsx-renderer.svg)](https://david-dm.org/rosylilly/react-jsx-renderer)
 [![Install size](https://packagephobia.com/badge?p=react-jsx-renderer)](https://packagephobia.com/result?p=react-jsx-renderer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A React Component for Rendering JSX.
+
+## Features
+
+- [x] Rendering JSX as React nodes
+- [x] Basic JavaScript syntax and featues
+  - Literal (Number, String, Boolean, Array, Object...)
+  - Call any methods
+  - Binary / Unary expressions
+  - Template literal
+  - and more...
+- [x] Injectable custom React components
+- [x] Pass binding variables
+- [x] Applicable filters to parsed nodes
+  - You can create allowlist / denylist filters to tagName, attributes or properties
 
 ## Usage
 
