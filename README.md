@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/react-jsx-renderer.svg)](https://www.npmjs.org/package/react-jsx-renderer)
 [![CI status](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/javascript.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/javascript.yml)
+[![Coverage Status](https://coveralls.io/repos/github/rosylilly/react-jsx-renderer/badge.svg?branch=refs/heads/main)](https://coveralls.io/github/rosylilly/react-jsx-renderer?branch=refs/heads/main)
 
 ## Usage
 
