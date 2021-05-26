@@ -85,8 +85,22 @@ const dev = merge(base(false), {
     path: join(dst, 'dev'),
   },
   externals: [],
+  module: {
+    rules: [
+      {
+        test: /\.(css|sass|scss)$/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          { loader: 'sass-loader' },
+        ],
+      },
+    ],
+  },
   plugins: [
-    new HTMLWebpackPlugin(),
+    new HTMLWebpackPlugin({
+      title: 'React JSX Renderer',
+    }),
   ],
   devServer: {
   },

@@ -1,12 +1,8 @@
+import 'bulma/bulma.sass';
 import { JSXRenderer } from '../src';
 import { render } from 'react-dom';
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
 import { JSXElement } from '../src/evaluator';
-
-const bulma = document.createElement('link');
-bulma.setAttribute('rel', 'stylesheet');
-bulma.setAttribute('href', 'https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css');
-document.head.appendChild(bulma);
 
 const Star: FC = ({ children }) => {
   return <p>***{children}***</p>
@@ -55,18 +51,45 @@ const App = () => {
   }, [update])
 
   return (
-    <div className='container section'>
-      <div className='columns'>
-        <div className='column'>
-          <div className='box content'>
-            <JSXRenderer code={state.jsx} binding={exampleBinding} components={exampleComponents} filters={exampleFilters} />
+    <>
+      <div className='hero is-dark'>
+        <div className='hero-body'>
+          <div className='container'>
+            <div className="columns">
+              <div className='column'>
+                <h1 className='title'>React JSX Renderer</h1>
+                <p className='subtitle'>A React component for Rendering JSX</p>
+              </div>
+              <div className='column has-text-right'>
+                <p>
+                  <a className="button is-medium is-white" href="https://github.com/rosylilly/react-jsx-renderer">View on GitHub</a>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-        <div className='column'>
-          <textarea className='textarea' rows={30} defaultValue={state.jsx}  onChange={onChange} />
+      </div>
+      <div className='container'>
+        <div className='columns section'>
+          <div className='column'>
+            <h2 className='title'>JSX</h2>
+            <textarea className='textarea' rows={30} defaultValue={state.jsx}  onChange={onChange} />
+          </div>
+          <div className='column'>
+            <h2 className='title'>Preview</h2>
+            <div className='box content'>
+              <JSXRenderer code={state.jsx} binding={exampleBinding} components={exampleComponents} filters={exampleFilters} />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      <div className='footer'>
+        <div className='content has-text-centered'>
+          <p><a href="https://github.com/rosylilly/react-jsx-renderer/blob/main/example/index.tsx">Source code on GitHub</a></p>
+          <p>&copy; 2021 Sho Kusano</p>
+        </div>
+      </div>
+    </>
   )
 }
 
