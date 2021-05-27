@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JSX should catch error syntax error 1`] = `"Unexpected token (1:9)"`;
+exports[`JSX should catch error of syntax 1`] = `"[1:11]: Unexpected token"`;
 
 exports[`JSX should catch error with number object 1`] = `"1"`;
 
@@ -39,7 +39,5 @@ Array [
   "
       ",
   "Fragment",
-  "
-    ",
 ]
 `;

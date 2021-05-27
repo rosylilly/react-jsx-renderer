@@ -1,5 +1,5 @@
 module.exports = {
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   collectCoverage: true,
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
@@ -7,6 +7,8 @@ module.exports = {
   globals: {
     'ts-jest': {
       useESM: true,
+      diagnostics: false,
+      isolatedModules: true,
     },
   },
   moduleFileExtensions: ['tsx', 'ts', 'jsx', 'js', 'mjs'],
