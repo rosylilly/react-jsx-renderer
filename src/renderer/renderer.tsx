@@ -1,7 +1,7 @@
-import { memo, VFC } from "react";
-import { evaluateJSX, EvaluateOptions } from "../evaluate";
-import { RenderingOptions } from "./options";
-import { render } from "./render";
+import { memo, VFC } from 'react';
+import { evaluateJSX, EvaluateOptions } from '../evaluate';
+import { RenderingOptions } from './options';
+import { render } from './render';
 
 export type JSXFallbackComponent = VFC<{ error: Error }>;
 
@@ -16,9 +16,9 @@ export const JSXRenderer: VFC<JSXRendererProps> = memo((props) => {
   try {
     const children = evaluateJSX(code, options);
     return <>{children.map((child) => render(child, options))}</>;
-  } catch(err) {
+  } catch (err) {
     const error = err instanceof Error ? err : new Error(err);
     const Fallback = options.fallbackComponent ? options.fallbackComponent : ({ error }) => <>{error.message}</>;
-    return <Fallback error={error} />
+    return <Fallback error={error} />;
   }
-})
+});

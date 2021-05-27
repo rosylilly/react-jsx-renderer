@@ -1,5 +1,5 @@
-import { Binding, ComponentsBinding } from "../types/binding";
-import { EvaluateOptions } from "./options";
+import { Binding, ComponentsBinding } from '../types/binding';
+import { EvaluateOptions } from './options';
 
 class KeyGenerator {
   private readonly prefix: string;
@@ -48,11 +48,7 @@ export class EvaluateContext {
   }
 
   public resolveComponent(name: string): any {
-    const allComponents = Object.assign(
-      {},
-      this.options.disableSearchCompontsByBinding ? {} : this.binding,
-      this.components,
-    );
+    const allComponents = Object.assign({}, this.options.disableSearchCompontsByBinding ? {} : this.binding, this.components);
 
     return name.split('.').reduce<any>((components, part) => {
       return components[part] || part;

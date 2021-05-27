@@ -41,7 +41,7 @@ const base = (withType) => ({
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.mjs', '.mjsx', '.jsx', '.js'],
-  }
+  },
 });
 
 /** @type {import('webpack').Configuration} */
@@ -89,11 +89,7 @@ const dev = merge(base(false), {
     rules: [
       {
         test: /\.(css|sass|scss)$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader' },
-          { loader: 'sass-loader' },
-        ],
+        use: [{ loader: 'style-loader' }, { loader: 'css-loader' }, { loader: 'sass-loader' }],
       },
     ],
   },
@@ -102,9 +98,8 @@ const dev = merge(base(false), {
       title: 'React JSX Renderer',
     }),
   ],
-  devServer: {
-  },
-})
+  devServer: {},
+});
 
 /** @type {import('webpack').Configuration[]} */
 const config = [dev, cjs, esm];

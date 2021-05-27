@@ -1,4 +1,4 @@
-import { JSXComponent } from "./node";
+import { JSXComponent } from './node';
 
 export type Binding = Record<string, any>;
 

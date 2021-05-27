@@ -1,4 +1,4 @@
-import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from "./filter";
+import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';
 
 export interface RenderingOptions {
   disableUnknownHTMLElement?: boolean;

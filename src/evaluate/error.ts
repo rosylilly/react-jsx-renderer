@@ -1,5 +1,5 @@
-import { ESTree } from "meriyah";
-import { EvaluateContext } from "./context";
+import { ESTree } from 'meriyah';
+import { EvaluateContext } from './context';
 
 export class EvaluateError extends Error {
   public readonly node: ESTree.Node;

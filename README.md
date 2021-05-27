@@ -103,7 +103,7 @@ to:
 ### Convert JSX with filters
 
 ```javascript
-const hrefFilter = (element) => {
+const hrefFilter = (element: JSXElement) => {
   const { props, component, children } = element;
   if (component !== 'a') return element;
 
@@ -117,7 +117,7 @@ const hrefFilter = (element) => {
 
 render(
   <JSXRenderer
-    filters={[hrefFilter]}
+    elementFilters={[hrefFilter]}
     code={
       '<p><a href="/">root</a></p>' +
       '<p><a href="../">upper directory</a></p>' +

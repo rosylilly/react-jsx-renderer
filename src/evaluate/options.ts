@@ -1,5 +1,5 @@
-import { Options } from "meriyah";
-import { Binding, ComponentsBinding } from "../types/binding";
+import { Options } from 'meriyah';
+import { Binding, ComponentsBinding } from '../types/binding';
 
 export interface EvaluateOptions {
   meriyah?: Options;
