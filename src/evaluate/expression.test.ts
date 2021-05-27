@@ -47,9 +47,9 @@ describe('Expression', () => {
   supported('Identifier', 'name', 'rosylilly');
   // notSupported('Import', 'import test as "test";');
   notSupported('ImportExpression', 'import("test")');
-  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', properties: { key: '1' }, children: ['test'] });
-  supported('JSXFragment', '<>test</>', { type: 'fragment', properties: { key: '1' }, children: ['test'] });
-  supported('JSXSpreadChild', '...[1, 2, 3]', { children: [1, 2, 3], properties: { key: '1' }, type: 'fragment' });
+  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', props: { key: '1' }, children: ['test'] });
+  supported('JSXFragment', '<>test</>', { type: 'fragment', props: { key: '1' }, children: ['test'] });
+  supported('JSXSpreadChild', '...[1, 2, 3]', { children: [1, 2, 3], props: { key: '1' }, type: 'fragment' });
   supported('Literal', '1.45', 1.45);
   supported('LogicalExpression', 'true && false || true', true);
   supported('MemberExpression', 'object.foo', 'foo');
