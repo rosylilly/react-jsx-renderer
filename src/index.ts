@@ -1,3 +1,2 @@
-export * from './error';
-export * from './evaluator';
-export { JSXRenderer } from './renderer';
+export * from './evaluate';
+export * from './renderer';
