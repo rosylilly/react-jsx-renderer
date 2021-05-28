@@ -1,6 +1,7 @@
 import { ESTree } from 'meriyah';
-import { EvaluateContext } from './context';
 import { JSXComponent, JSXElement, JSXFragment, JSXNode, JSXProperties, JSXText } from '../types/node';
+import { evalBindingPattern, setBinding } from './bind';
+import { EvaluateContext } from './context';
 import { EvaluateError } from './error';
 
 export const evalExpression = (exp: ESTree.Expression, context: EvaluateContext): any => {
@@ -103,7 +104,26 @@ export const evalArrowFunctionExpression = (exp: ESTree.ArrowFunctionExpression,
 };
 
 export const evalAssignmentExpression = (exp: ESTree.AssignmentExpression, context: EvaluateContext) => {
-  throw new EvaluateError('assignment is not supported', exp, context);
+  const binding = evalBindingPattern(exp.left, context);
+
+  const { operator } = exp;
+  if (operator === '=') {
+    const val = evalExpression(exp.right, context);
+    setBinding(binding, val, context);
+    return val;
+  } else {
+    const val = evalBinaryExpression(
+      {
+        type: 'BinaryExpression',
+        operator: operator.slice(0, operator.length - 1),
+        left: exp.left,
+        right: exp.right,
+      },
+      context,
+    );
+    setBinding(binding, val, context);
+    return val;
+  }
 };
 
 export const evalAwaitExpression = (exp: ESTree.AwaitExpression, context: EvaluateContext) => {
@@ -205,7 +225,15 @@ export const evalFunctionExpression = (exp: ESTree.FunctionExpression, context: 
 };
 
 export const evalIdentifier = (exp: ESTree.Identifier, context: EvaluateContext) => {
-  return context.resolveIdentifier(exp.name);
+  const variable = context.resolveIdentifier(exp.name);
+  if (!variable) {
+    if (context.options.raiseReferenceError) {
+      throw new EvaluateError(`${exp.name} is not defined`, exp, context);
+    } else {
+      return undefined;
+    }
+  }
+  return variable.value;
 };
 
 export const evalImport = (exp: ESTree.Import, context: EvaluateContext) => {
@@ -286,35 +314,7 @@ export const evalObjectExpression = (exp: ESTree.ObjectExpression, context: Eval
 };
 
 export const evalObjectPattern = (exp: ESTree.ObjectPattern, context: EvaluateContext) => {
-  const object: Record<any, any> = {};
-  exp.properties.forEach((property) => {
-    switch (property.type) {
-      case 'MethodDefinition':
-        evalMethodDefinition(property, context);
-        break;
-      case 'Property': {
-        const [key, value] = evalProperty(property, context);
-
-        switch (property.kind) {
-          case 'init':
-            object[key] = value;
-            break;
-          case 'get': // TODO: Implement here
-          case 'set': // TODO: Implement here
-        }
-        break;
-      }
-      case 'RestElement': {
-        Object.assign(object, evalRestElement(property, context));
-        break;
-      }
-      case 'SpreadElement': {
-        Object.assign(object, evalSpreadElement(property, context));
-        break;
-      }
-    }
-  });
-  return object;
+  return evalObjectExpression({ ...exp, type: 'ObjectExpression' }, context);
 };
 
 export const evalRestElement = (exp: ESTree.RestElement, context: EvaluateContext) => {
@@ -380,9 +380,13 @@ export const evalUnaryExpression = (exp: ESTree.UnaryExpression, context: Evalua
 };
 
 export const evalUpdateExpression = (exp: ESTree.UpdateExpression, context: EvaluateContext) => {
+  const binding = evalBindingPattern(exp.argument, context);
+  const current = evalExpression(exp.argument, context);
   switch (exp.operator) {
-    case '++': // TODO: Implement
-    case '--': // TODO: Implement
+    case '++':
+      return setBinding(binding, current + 1, context);
+    case '--':
+      return setBinding(binding, current - 1, context);
     default:
       throw new EvaluateError(`Unknown update operator: ${exp.operator}`, exp, context);
   }
