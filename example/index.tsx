@@ -1,7 +1,7 @@
 import 'bulma/bulma.sass';
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
 import { render } from 'react-dom';
-import { JSXElementFilter, JSXRenderer } from '../src';
+import { evaluateJSX, JSXElementFilter, JSXRenderer, JSXRendererProps } from '../src';
 
 const Star: FC = ({ children }) => {
   return <p>***{children}***</p>;
@@ -12,6 +12,12 @@ const exampleHTML = `<h1>Hello, World</h1>
 <video controls src="https://samplelib.com/lib/download/mp4/sample-5s.mp4"></video>
 <p>1 + 1 = {1 + 1}</p>
 <Star>キラキラ</Star>
+<p>Now: {Date.now()}</p>
+<unknown>unknown element</unknown>
+
+<h2>XSS Test</h2>
+<p>Look your console logs</p>
+{1..constructor.constructor('console.log("XSS Now: " + Date.now())')()}
 `;
 
 const exampleBinding = {
@@ -22,6 +28,7 @@ const exampleBinding = {
   number: 128,
   string: 'string',
   boolean: true,
+  Date,
 };
 
 const exampleComponents = {
@@ -42,7 +49,16 @@ const exampleFilters: JSXElementFilter[] = [
   },
 ];
 
+const defaultOptions: Omit<JSXRendererProps, 'code' | 'nodes'> = {
+  disableUnknownHTMLElement: false,
+  disableCall: false,
+  disableNew: false,
+  disableKeyGeneration: false,
+};
+
 const App = () => {
+  const [_, ticker] = useState(0);
+  const [options, updateOptions] = useState(defaultOptions);
   const [state, update] = useState({ jsx: exampleHTML });
 
   const onChange = useCallback<ChangeEventHandler<HTMLTextAreaElement>>(
@@ -51,6 +67,15 @@ const App = () => {
     },
     [update],
   );
+  const fullOptions = {
+    binding: exampleBinding,
+    components: exampleComponents,
+    elementFilters: exampleFilters,
+    ...options,
+  };
+
+  const nodes = evaluateJSX(state.jsx, fullOptions);
+  const json = JSON.stringify(nodes, null, 2);
 
   return (
     <>
@@ -77,13 +102,62 @@ const App = () => {
         <div className="columns section">
           <div className="column">
             <h2 className="title">JSX</h2>
-            <textarea className="textarea" rows={30} defaultValue={state.jsx} onChange={onChange} />
+            <form className="form" onSubmit={(e) => e.preventDefault()}>
+              <div className="field">
+                <label className="label" htmlFor="code">
+                  JSX Code
+                </label>
+                <div className="control">
+                  <textarea name="code" className="textarea" rows={30} defaultValue={state.jsx} onChange={onChange} />
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="label">Options</label>
+                {Object.keys(options).map((option) => (
+                  <div className="control" key={option}>
+                    <label className="checkbox">
+                      <input
+                        type="checkbox"
+                        defaultChecked={options[option]}
+                        onChange={(e) => {
+                          updateOptions((opts) => {
+                            const update = {};
+                            update[option] = e.target.checked;
+                            return { ...opts, ...update };
+                          });
+                        }}
+                      />
+                      {` ${option}`}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <div className="field">
+                <div className="control">
+                  <button
+                    className="button is-info is-fullwidth"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      ticker((t) => t + 1);
+                    }}
+                  >
+                    Redraw
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
           <div className="column">
             <h2 className="title">Preview</h2>
             <div className="box content">
-              <JSXRenderer code={state.jsx} binding={exampleBinding} components={exampleComponents} elementFilters={exampleFilters} />
+              <JSXRenderer nodes={nodes} {...fullOptions} />
             </div>
+            <h2 className="subtitle">Preview JSON</h2>
+            <pre className="box">
+              <code>{json}</code>
+            </pre>
           </div>
         </div>
       </div>
