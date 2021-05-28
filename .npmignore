@@ -3,6 +3,8 @@
 /.git
 /.github
 /coverage
+/dist/dev
+/dist/**/*.map
 /example
 /jest.config.js
 /node_modules

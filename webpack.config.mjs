@@ -13,7 +13,7 @@ const jsx = mode === 'production' ? 'react-jsx' : 'react-jsxdev';
 /** @type {(withType: boolean) => import('webpack').Configuration} */
 const base = (withType) => ({
   mode,
-  devtool: 'source-map',
+  devtool: mode === 'production' ? false : 'source-map',
   entry: {
     index: join(src, 'index.ts'),
   },
@@ -32,6 +32,8 @@ const base = (withType) => ({
               transpileOnly: !withType,
               compilerOptions: {
                 jsx,
+                souceMap: mode === 'development',
+                declarationMap: mode === 'development',
               },
             },
           },
