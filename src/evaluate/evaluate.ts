@@ -1,6 +1,6 @@
 import { ESTree, Options, parseModule } from 'meriyah';
 import { JSXNode } from '../types/node';
-import { EvaluateContext } from './context';
+import { JSXContext } from './context';
 import { evalJSXChild } from './expression';
 import { EvaluateOptions } from './options';
 import { evalProgram } from './program';
@@ -12,14 +12,14 @@ const meriyahForceOptions: Options = {
 };
 
 export const parse = (code: string, forceExpression: boolean, options: EvaluateOptions = {}) => {
-  const { meriyah } = options;
+  const { meriyah, debug } = options;
   try {
     const parserOptions = Object.assign({}, meriyah || {}, meriyahForceOptions);
-    options.debug && console.time('JSX parse');
+    debug && console.time('JSX parse');
     const program = parseModule(forceExpression ? `<>${code}</>` : code, parserOptions);
     return program;
   } finally {
-    options.debug && console.timeEnd('JSX parse');
+    debug && console.timeEnd('JSX parse');
   }
 };
 
@@ -27,7 +27,7 @@ export const evaluate = (program: string | ESTree.Program, options: EvaluateOpti
   if (typeof program === 'string') {
     program = parse(program, false, options);
   }
-  const context = new EvaluateContext(options);
+  const context = new JSXContext(options);
   evalProgram(program, context);
   return context;
 };
@@ -46,7 +46,7 @@ export const evaluateJSX = (program: string | ESTree.Program, options: EvaluateO
     return [];
   }
 
-  const context = new EvaluateContext(options);
+  const context = new JSXContext(options);
 
   try {
     options.debug && console.time('JSX eval ');

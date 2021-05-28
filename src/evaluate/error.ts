@@ -1,5 +1,5 @@
 import { ESTree } from 'meriyah';
-import { EvaluateContext } from './context';
+import { JSXContext } from './context';
 
 class JSXError extends Error {
   constructor(message: string) {
@@ -16,9 +16,9 @@ class JSXError extends Error {
 
 export class JSXEvaluateError extends JSXError {
   public readonly node: ESTree.Node;
-  public readonly context: EvaluateContext;
+  public readonly context: JSXContext;
 
-  constructor(message: string, node: ESTree.Node, context: EvaluateContext) {
+  constructor(message: string, node: ESTree.Node, context: JSXContext) {
     const loc = node?.loc?.start;
     super([loc ? `[${loc.line}:${loc.column}] ` : '', `${message}`].join(''));
 
@@ -90,7 +90,7 @@ export class JSXReturn extends JSXError {
   }
 }
 
-export const wrapJSXError = (e: any, node: ESTree.Node, context: EvaluateContext): JSXError => {
+export const wrapJSXError = (e: any, node: ESTree.Node, context: JSXContext): JSXError => {
   if (e instanceof JSXError) return e;
   const error = e instanceof Error ? e : new Error(e);
   const jsxError = new JSXEvaluateError(error.message, node, context);

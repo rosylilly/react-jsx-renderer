@@ -1,10 +1,10 @@
 import { ESTree } from 'meriyah';
 import { evalBindingPattern, IdentifierBinding, setBinding } from './bind';
-import { EvaluateContext } from './context';
+import { JSXContext } from './context';
 import { JSXReturn } from './error';
 import { evalStatement } from './statement';
 
-export const evalFunction = (exp: ESTree.FunctionDeclaration | ESTree.FunctionExpression, context: EvaluateContext) => {
+export const evalFunction = (exp: ESTree.FunctionDeclaration | ESTree.FunctionExpression, context: JSXContext) => {
   const func = function (...args: any[]): any {
     let retval: any;
     context.pushStack(context.resolveThis());

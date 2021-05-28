@@ -1,8 +1,9 @@
-import { Options } from 'meriyah';
+import * as meriyah from 'meriyah';
+import { Options } from '../types';
 import { Binding, ComponentsBinding } from '../types/binding';
 
-export interface EvaluateOptions {
-  meriyah?: Options;
+export interface EvaluateOptions extends Options {
+  meriyah?: meriyah.Options;
 
   binding?: Binding;
   components?: ComponentsBinding;
@@ -29,6 +30,4 @@ export interface EvaluateOptions {
    * When this option is enabled, access to undefined variables will raise an exception.
    */
   raiseReferenceError?: boolean;
-
-  debug?: boolean;
 }
