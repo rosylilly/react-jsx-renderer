@@ -4,7 +4,7 @@ import { RenderingOptions } from './options';
 
 const unknownElementCache = new Map<string, boolean>();
 
-export const render = (node: JSXNode, options: RenderingOptions): ReactNode => {
+export const renderJSX = (node: JSXNode, options: RenderingOptions): ReactNode => {
   if (node === null) return node;
   if (node === undefined) return node;
 
@@ -44,14 +44,14 @@ const renderJSXElement = (element: JSXElement, options: RenderingOptions): React
     if (unknownElementCache.get(component)) return undefined;
   }
 
-  return createElement(filtered.component, filtered.props, ...filtered.children.map((child) => render(child, options)));
+  return createElement(filtered.component, filtered.props, ...filtered.children.map((child) => renderJSX(child, options)));
 };
 
 const renderJSXFragment = (fragment: JSXFragment, options: RenderingOptions): ReactNode => {
   const filtered = applyFilter(options.fragmentFilters || [], fragment);
 
   if (filtered) {
-    return createElement(Fragment, filtered.props, ...filtered.children.map((child) => render(child, options)));
+    return createElement(Fragment, filtered.props, ...filtered.children.map((child) => renderJSX(child, options)));
   } else {
     return undefined;
   }

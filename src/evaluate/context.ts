@@ -130,8 +130,9 @@ export class EvaluateContext {
   }
 
   public setVariable(name: string, value: any) {
-    if (this.stack) {
-      this.stack.set(name, value);
+    const variable = this.resolveIdentifier(name);
+    if (variable) {
+      variable.value = value;
     }
   }
 
@@ -154,5 +155,16 @@ export class EvaluateContext {
 
   public export(name: string, value: any) {
     this.exports[name] = value;
+  }
+
+  private _label: string | undefined;
+  public get label(): string | undefined {
+    const label = this._label;
+    this._label = undefined;
+    return label;
+  }
+
+  public set label(l: string | undefined) {
+    this._label = l;
   }
 }

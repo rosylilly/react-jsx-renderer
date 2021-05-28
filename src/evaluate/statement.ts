@@ -1,8 +1,9 @@
 import { ESTree } from 'meriyah';
 import { Binding, ArrayBinding, evalBindingPattern, IdentifierBinding, ObjectBinding, setBinding } from './bind';
 import { EvaluateContext } from './context';
-import { EvaluateError } from './error';
+import { EvaluateError, JSXBreak, JSXContinue, JSXReturn } from './error';
 import { evalClassDeclaration, evalClassExpression, evalExpression } from './expression';
+import { evalFunction } from './function';
 
 export const evalStatement = (stmt: ESTree.Statement, context: EvaluateContext) => {
   switch (stmt.type) {
@@ -64,19 +65,34 @@ export const evalStatement = (stmt: ESTree.Statement, context: EvaluateContext) 
 };
 
 export const evalBlockStatement = (stmt: ESTree.BlockStatement, context: EvaluateContext) => {
-  stmt.body.forEach((stmt) => {
-    evalStatement(stmt, context);
-  });
+  const label = context.label;
+
+  for (const child of stmt.body) {
+    try {
+      evalStatement(child, context);
+    } catch (err) {
+      if (err instanceof JSXBreak) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            break;
+          } else {
+            throw err;
+          }
+        } else {
+          break;
+        }
+      }
+      throw err;
+    }
+  }
 };
 
-const BreakError = new Error('break');
-export const evalBreakStatement = (_: ESTree.BreakStatement, __: EvaluateContext) => {
-  throw BreakError;
+export const evalBreakStatement = (stmt: ESTree.BreakStatement, __: EvaluateContext) => {
+  throw new JSXBreak(stmt.label ? stmt.label.name : undefined);
 };
 
-const ContinueError = new Error('continue');
-export const evalContinueStatement = (_: ESTree.ContinueStatement, __: EvaluateContext) => {
-  throw ContinueError;
+export const evalContinueStatement = (stmt: ESTree.ContinueStatement, __: EvaluateContext) => {
+  throw new JSXContinue(stmt.label ? stmt.label.name : undefined);
 };
 
 export const evalDebuggerStatement = (_: ESTree.DebuggerStatement, __: EvaluateContext) => {
@@ -85,12 +101,33 @@ export const evalDebuggerStatement = (_: ESTree.DebuggerStatement, __: EvaluateC
 };
 
 export const evalDoWhileStatement = (stmt: ESTree.DoWhileStatement, context: EvaluateContext) => {
+  const label = context.label;
+
   do {
     try {
       evalStatement(stmt.body, context);
     } catch (err) {
-      if (err === BreakError) break;
-      if (err === ContinueError) continue;
+      if (err instanceof JSXBreak) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            break;
+          } else {
+            throw err;
+          }
+        } else {
+          break;
+        }
+      } else if (err instanceof JSXContinue) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            continue;
+          } else {
+            throw err;
+          }
+        } else {
+          continue;
+        }
+      }
       throw err;
     }
   } while (evalExpression(stmt.test, context));
@@ -124,8 +161,13 @@ export const evalExportNamedDeclaration = (stmt: ESTree.ExportNamedDeclaration, 
   if (!stmt.declaration) return undefined;
 
   switch (stmt.declaration.type) {
-    case 'FunctionDeclaration':
-      return evalFunctionDeclaration(stmt.declaration, context);
+    case 'FunctionDeclaration': {
+      const [bind, func] = evalFunctionDeclaration(stmt.declaration, context);
+      if (bind) {
+        context.export(bind.name, func);
+      }
+      break;
+    }
     case 'VariableDeclaration': {
       const binds = evalVariableDeclaration(stmt.declaration, context);
       const exportBind = (bind: Binding) => {
@@ -150,6 +192,7 @@ export const evalExpressionStatement = (stmt: ESTree.ExpressionStatement, contex
 };
 
 export const evalForInStatement = (stmt: ESTree.ForInStatement, context: EvaluateContext) => {
+  const label = context.label;
   const right = evalExpression(stmt.right, context);
 
   context.pushStack(context.resolveThis());
@@ -172,8 +215,27 @@ export const evalForInStatement = (stmt: ESTree.ForInStatement, context: Evaluat
     try {
       evalStatement(stmt.body, context);
     } catch (err) {
-      if (err === BreakError) break;
-      if (err === ContinueError) continue;
+      if (err instanceof JSXBreak) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            break;
+          } else {
+            throw err;
+          }
+        } else {
+          break;
+        }
+      } else if (err instanceof JSXContinue) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            continue;
+          } else {
+            throw err;
+          }
+        } else {
+          continue;
+        }
+      }
       throw err;
     }
   }
@@ -181,6 +243,7 @@ export const evalForInStatement = (stmt: ESTree.ForInStatement, context: Evaluat
 };
 
 export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: EvaluateContext) => {
+  const label = context.label;
   const right = evalExpression(stmt.right, context);
 
   context.pushStack(context.resolveThis());
@@ -203,8 +266,27 @@ export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: Evaluat
     try {
       evalStatement(stmt.body, context);
     } catch (err) {
-      if (err === BreakError) break;
-      if (err === ContinueError) continue;
+      if (err instanceof JSXBreak) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            break;
+          } else {
+            throw err;
+          }
+        } else {
+          break;
+        }
+      } else if (err instanceof JSXContinue) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            continue;
+          } else {
+            throw err;
+          }
+        } else {
+          continue;
+        }
+      }
       throw err;
     }
   }
@@ -212,6 +294,7 @@ export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: Evaluat
 };
 
 export const evalForStatement = (stmt: ESTree.ForStatement, context: EvaluateContext) => {
+  const label = context.label;
   context.pushStack(undefined);
   const init = () => {
     if (stmt.init) {
@@ -234,7 +317,17 @@ export const evalForStatement = (stmt: ESTree.ForStatement, context: EvaluateCon
     try {
       evalStatement(stmt.body, context);
     } catch (err) {
-      if (err === ContinueError) continue;
+      if (err instanceof JSXContinue) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            continue;
+          } else {
+            throw err;
+          }
+        } else {
+          continue;
+        }
+      }
       throw err;
     }
   }
@@ -242,7 +335,7 @@ export const evalForStatement = (stmt: ESTree.ForStatement, context: EvaluateCon
 };
 
 export const evalFunctionDeclaration = (stmt: ESTree.FunctionDeclaration, context: EvaluateContext) => {
-  throw new EvaluateError('fuction is not supported', stmt, context);
+  return evalFunction(stmt, context);
 };
 
 export const evalIfStatement = (stmt: ESTree.IfStatement, context: EvaluateContext) => {
@@ -258,14 +351,18 @@ export const evalImportDeclaration = (stmt: ESTree.ImportDeclaration, context: E
 };
 
 export const evalLabeledStatement = (stmt: ESTree.LabeledStatement, context: EvaluateContext) => {
-  throw new EvaluateError('label is not supported', stmt, context);
+  context.label = stmt.label.name;
+  evalStatement(stmt.body, context);
+  context.label = undefined;
 };
 
 export const evalReturnStatement = (stmt: ESTree.ReturnStatement, context: EvaluateContext) => {
-  throw new EvaluateError('return is not supported', stmt, context);
+  const val = stmt.argument ? evalExpression(stmt.argument, context) : undefined;
+  throw new JSXReturn(val);
 };
 
 export const evalSwitchStatement = (stmt: ESTree.SwitchStatement, context: EvaluateContext) => {
+  const label = context.label;
   const discriminant = evalExpression(stmt.discriminant, context);
   let match = false;
   for (const caseStmt of stmt.cases) {
@@ -275,7 +372,17 @@ export const evalSwitchStatement = (stmt: ESTree.SwitchStatement, context: Evalu
         caseStmt.consequent.forEach((stmt) => evalStatement(stmt, context)), context;
       }
     } catch (err) {
-      if (err === BreakError) break;
+      if (err instanceof JSXBreak) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            break;
+          } else {
+            throw err;
+          }
+        } else {
+          break;
+        }
+      }
       throw err;
     }
   }
@@ -393,12 +500,33 @@ export const evalVariableDeclaration = (stmt: ESTree.VariableDeclaration, contex
 };
 
 export const evalWhileStatement = (stmt: ESTree.WhileStatement, context: EvaluateContext) => {
+  const label = context.label;
+
   while (evalExpression(stmt.test, context)) {
     try {
       evalStatement(stmt.body, context);
     } catch (err) {
-      if (err === BreakError) break;
-      if (err === ContinueError) continue;
+      if (err instanceof JSXBreak) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            break;
+          } else {
+            throw err;
+          }
+        } else {
+          break;
+        }
+      } else if (err instanceof JSXContinue) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            continue;
+          } else {
+            throw err;
+          }
+        } else {
+          continue;
+        }
+      }
       throw err;
     }
   }

@@ -2,7 +2,9 @@ import { ESTree } from 'meriyah';
 import { JSXComponent, JSXElement, JSXFragment, JSXNode, JSXProperties, JSXText } from '../types/node';
 import { evalBindingPattern, setBinding } from './bind';
 import { EvaluateContext } from './context';
-import { EvaluateError } from './error';
+import { EvaluateError, JSXReturn } from './error';
+import { evalFunction } from './function';
+import { evalStatement } from './statement';
 
 export const evalExpression = (exp: ESTree.Expression, context: EvaluateContext): any => {
   switch (exp.type) {
@@ -100,7 +102,41 @@ export const evalArrayPattern = (exp: ESTree.ArrayPattern, context: EvaluateCont
 };
 
 export const evalArrowFunctionExpression = (exp: ESTree.ArrowFunctionExpression, context: EvaluateContext) => {
-  throw new EvaluateError('arrow function is not supported', exp, context);
+  if (exp.async) {
+    throw new EvaluateError('async function not supported', exp, context);
+  }
+
+  const self = context.resolveThis();
+  const func = function (...args: any[]): any {
+    let retval: any;
+    context.pushStack(self);
+    exp.params.forEach((param, idx) => {
+      const bind = evalBindingPattern(param, context);
+      const val = args[idx] === undefined ? bind.default : args[idx];
+      setBinding(bind, val, context, 'let');
+    });
+
+    try {
+      switch (exp.body.type) {
+        case 'BlockStatement':
+          evalStatement(exp.body, context);
+          break;
+        default:
+          retval = evalExpression(exp.body, context);
+      }
+    } catch (err) {
+      if (err instanceof JSXReturn) {
+        retval = err.value;
+      } else {
+        throw err;
+      }
+    }
+
+    context.popStack();
+    return retval;
+  };
+
+  return func;
 };
 
 export const evalAssignmentExpression = (exp: ESTree.AssignmentExpression, context: EvaluateContext) => {
@@ -188,6 +224,8 @@ export const evalBinaryExpression = (exp: ESTree.BinaryExpression, context: Eval
 };
 
 export const evalCallExpression = (exp: ESTree.CallExpression, context: EvaluateContext) => {
+  if (context.options.disableCall) return undefined;
+
   const { callee } = exp;
   const receiver = callee.type === 'MemberExpression' ? evalExpression(callee.object, context) : undefined;
   const method = evalExpression(callee, context) as (...args: any[]) => any;
@@ -221,7 +259,7 @@ export const evalConditionalExpression = (exp: ESTree.ConditionalExpression, con
 };
 
 export const evalFunctionExpression = (exp: ESTree.FunctionExpression, context: EvaluateContext) => {
-  throw new EvaluateError('function is not supported', exp, context);
+  return evalFunction(exp, context)[1];
 };
 
 export const evalIdentifier = (exp: ESTree.Identifier, context: EvaluateContext) => {
@@ -276,6 +314,8 @@ export const evalMetaProperty = (exp: ESTree.MetaProperty, context: EvaluateCont
 };
 
 export const evalNewExpression = (exp: ESTree.NewExpression, context: EvaluateContext) => {
+  if (context.options.disableCall || context.options.disableNew) return undefined;
+
   const callee = evalExpression(exp.callee, context);
   const arugments = exp.arguments.map((arg) => evalExpression(arg, context));
   return new callee(...arugments);
