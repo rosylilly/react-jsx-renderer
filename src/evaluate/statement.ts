@@ -1,8 +1,9 @@
 import { ESTree } from 'meriyah';
 import { Binding, ArrayBinding, evalBindingPattern, IdentifierBinding, ObjectBinding, setBinding } from './bind';
 import { EvaluateContext } from './context';
-import { EvaluateError } from './error';
+import { EvaluateError, JSXReturn } from './error';
 import { evalClassDeclaration, evalClassExpression, evalExpression } from './expression';
+import { evalFunction } from './function';
 
 export const evalStatement = (stmt: ESTree.Statement, context: EvaluateContext) => {
   switch (stmt.type) {
@@ -124,8 +125,13 @@ export const evalExportNamedDeclaration = (stmt: ESTree.ExportNamedDeclaration, 
   if (!stmt.declaration) return undefined;
 
   switch (stmt.declaration.type) {
-    case 'FunctionDeclaration':
-      return evalFunctionDeclaration(stmt.declaration, context);
+    case 'FunctionDeclaration': {
+      const [bind, func] = evalFunctionDeclaration(stmt.declaration, context);
+      if (bind) {
+        context.export(bind.name, func);
+      }
+      break;
+    }
     case 'VariableDeclaration': {
       const binds = evalVariableDeclaration(stmt.declaration, context);
       const exportBind = (bind: Binding) => {
@@ -242,7 +248,7 @@ export const evalForStatement = (stmt: ESTree.ForStatement, context: EvaluateCon
 };
 
 export const evalFunctionDeclaration = (stmt: ESTree.FunctionDeclaration, context: EvaluateContext) => {
-  throw new EvaluateError('fuction is not supported', stmt, context);
+  return evalFunction(stmt, context);
 };
 
 export const evalIfStatement = (stmt: ESTree.IfStatement, context: EvaluateContext) => {
@@ -262,7 +268,8 @@ export const evalLabeledStatement = (stmt: ESTree.LabeledStatement, context: Eva
 };
 
 export const evalReturnStatement = (stmt: ESTree.ReturnStatement, context: EvaluateContext) => {
-  throw new EvaluateError('return is not supported', stmt, context);
+  const val = stmt.argument ? evalExpression(stmt.argument, context) : undefined;
+  throw new JSXReturn(val);
 };
 
 export const evalSwitchStatement = (stmt: ESTree.SwitchStatement, context: EvaluateContext) => {

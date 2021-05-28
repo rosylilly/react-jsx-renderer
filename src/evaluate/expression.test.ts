@@ -34,7 +34,7 @@ describe('Expression', () => {
 
   supported('ArrayExpression', '[1, 2, 3, , 5]', [1, 2, 3, null, 5]);
   // supported('ArrayPattern')
-  notSupported('ArrowFunctionExpression', '() => {}');
+  // supported('ArrowFunctionExpression', '() => {}', Function);
   supported('AssignmentExpression', 'a += 1', NaN);
   // notSupported('AwaitExpression', 'await promise()')
   supported('BinaryExpression', '1 + 1', 2);
@@ -43,7 +43,7 @@ describe('Expression', () => {
   // notSupported('ClassDeclaration', 'class {}');
   notSupported('ClassExpression', 'class {}');
   supported('ConditionalExpression', 'true ? false ? 1 : 2 : 3', 2);
-  notSupported('FunctionExpression', 'function() { }');
+  // supported('FunctionExpression', 'function() { }');
   supported('Identifier', 'name', 'rosylilly');
   // notSupported('Import', 'import test as "test";');
   notSupported('ImportExpression', 'import("test")');
@@ -128,5 +128,39 @@ describe('Expression', () => {
     }
 
     expect(evaluateJSX('{typeof "hello"}')).toStrictEqual(['string']);
+  });
+
+  it('should evaluate arrow function', () => {
+    const func = evaluateJSX('{() => {}}')[0];
+    expect(func).toBeInstanceOf(Function);
+
+    const expRet = evaluateJSX('{(() => 100)()}')[0];
+    expect(expRet).toStrictEqual(100);
+
+    const argRet = evaluateJSX('{((a) => a)(200)}')[0];
+    expect(argRet).toStrictEqual(200);
+
+    const stmtRet = evaluateJSX('{((a) => { return a + 100 })(200)}')[0];
+    expect(stmtRet).toStrictEqual(300);
+
+    const defaultParamRet = evaluateJSX('{((a, b = 2) => { return a + b + 100 })(200)}')[0];
+    expect(defaultParamRet).toStrictEqual(302);
+  });
+
+  it('should evaluate function', () => {
+    const func = evaluateJSX('{function() {}}')[0];
+    expect(func).toBeInstanceOf(Function);
+
+    const expRet = evaluateJSX('{(function() { return 100 })()}')[0];
+    expect(expRet).toStrictEqual(100);
+
+    const argRet = evaluateJSX('{(function (a) { return a })(200)}')[0];
+    expect(argRet).toStrictEqual(200);
+
+    const stmtRet = evaluateJSX('{(function (a) { return a + 100 })(200)}')[0];
+    expect(stmtRet).toStrictEqual(300);
+
+    const defaultParamRet = evaluateJSX('{(function (a, b = 2) { return a + b + 100 })(200)}')[0];
+    expect(defaultParamRet).toStrictEqual(302);
   });
 });

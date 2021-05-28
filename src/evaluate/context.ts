@@ -130,8 +130,9 @@ export class EvaluateContext {
   }
 
   public setVariable(name: string, value: any) {
-    if (this.stack) {
-      this.stack.set(name, value);
+    const variable = this.resolveIdentifier(name);
+    if (variable) {
+      variable.value = value;
     }
   }
 

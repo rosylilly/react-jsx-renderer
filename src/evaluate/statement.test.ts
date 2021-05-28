@@ -47,11 +47,11 @@ describe('Statement', () => {
   supported('ForInStatement', 'for (const i in [1,2,3]) { break; }');
   supported('ForOfStatement', 'for (const i of [1,2,3]) { break; }');
   supported('ForStatement', 'for (let i = 0; i < 3; i++) { break; }');
-  notSupported('FunctionDeclaration', 'function f() { }');
+  supported('FunctionDeclaration', 'function f() { }');
   supported('IfStatement', 'if(true) { }');
   supported('ImportDeclaration', 'import "mod";');
   notSupported('LabeledStatement', 'label: { foo() }');
-  notSupported('ReturnStatement', '() => { return 1; }');
+  // supported('ReturnStatement', '() => { return 1; }');
   supported('SwitchStatement', 'switch(1) { case 2: break }');
   supported('ThrowStatement', 'throw "test";', {}, (m) => m.toThrowError('test'));
   supported('TryStatement', 'try { foo(); }');
@@ -223,6 +223,32 @@ describe('Statement', () => {
 
     expect(coutner).toEqual(2);
     expect(error).toEqual('test');
+    expect(context.stacks.length).toEqual(2);
+  });
+
+  it('should support function', () => {
+    const binding = {
+      console,
+    };
+    const context = evaluate(
+      `
+        let i = 0;
+
+        function incr() {
+          i++;
+        }
+
+        const decr = function() { i-- };
+
+        incr();
+        incr();
+        decr();
+        export { i };
+      `,
+      { binding },
+    );
+
+    expect(context.exports['i']).toEqual(1);
     expect(context.stacks.length).toEqual(2);
   });
 });
