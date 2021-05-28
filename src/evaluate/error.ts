@@ -33,6 +33,10 @@ export class JSXBreak extends Error {
       Error.captureStackTrace(this, EvaluateError);
     }
   }
+
+  public get isLabeled(): boolean {
+    return this.label !== undefined;
+  }
 }
 
 export class JSXContinue extends Error {
@@ -48,6 +52,10 @@ export class JSXContinue extends Error {
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, EvaluateError);
     }
+  }
+
+  public get isLabeled(): boolean {
+    return this.label !== undefined;
   }
 }
 

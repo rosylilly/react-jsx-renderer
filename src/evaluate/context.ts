@@ -156,4 +156,15 @@ export class EvaluateContext {
   public export(name: string, value: any) {
     this.exports[name] = value;
   }
+
+  private _label: string | undefined;
+  public get label(): string | undefined {
+    const label = this._label;
+    this._label = undefined;
+    return label;
+  }
+
+  public set label(l: string | undefined) {
+    this._label = l;
+  }
 }
