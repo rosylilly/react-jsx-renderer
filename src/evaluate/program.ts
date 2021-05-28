@@ -1,8 +1,8 @@
 import { ESTree } from 'meriyah';
-import { EvaluateContext } from './context';
+import { JSXContext } from './context';
 import { evalStatement } from './statement';
 
-export const evalProgram = (prog: ESTree.Program, context: EvaluateContext) => {
+export const evalProgram = (prog: ESTree.Program, context: JSXContext) => {
   prog.body.forEach((stmt) => {
     evalStatement(stmt, context);
   });

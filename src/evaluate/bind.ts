@@ -1,5 +1,5 @@
 import { ESTree } from 'meriyah';
-import { EvaluateContext } from './context';
+import { JSXContext } from './context';
 import { evalExpression } from './expression';
 
 export interface IdentifierBinding {
@@ -28,7 +28,7 @@ export interface ArrayBinding {
 
 export type Binding = IdentifierBinding | ObjectBinding | ArrayBinding;
 
-export const evalBindingPattern = (bind: ESTree.BindingPattern | ESTree.AssignmentPattern | ESTree.Expression, context: EvaluateContext): Binding => {
+export const evalBindingPattern = (bind: ESTree.BindingPattern | ESTree.AssignmentPattern | ESTree.Expression, context: JSXContext): Binding => {
   switch (bind.type) {
     case 'Identifier':
       return evalIdentifierBinding(bind, context);
@@ -46,14 +46,14 @@ export const evalBindingPattern = (bind: ESTree.BindingPattern | ESTree.Assignme
   }
 };
 
-const evalIdentifierBinding = (bind: ESTree.Identifier, _: EvaluateContext): IdentifierBinding => {
+const evalIdentifierBinding = (bind: ESTree.Identifier, _: JSXContext): IdentifierBinding => {
   return {
     type: 'Identifier',
     name: bind.name,
   };
 };
 
-const evalObjectBinding = (bind: ESTree.ObjectPattern, context: EvaluateContext): ObjectBinding => {
+const evalObjectBinding = (bind: ESTree.ObjectPattern, context: JSXContext): ObjectBinding => {
   const binding: ObjectBinding = {
     type: 'Object',
     binds: {},
@@ -77,7 +77,7 @@ const evalObjectBinding = (bind: ESTree.ObjectPattern, context: EvaluateContext)
   return binding;
 };
 
-const evalArrayBinding = (bind: ESTree.ArrayPattern, context: EvaluateContext): ArrayBinding => {
+const evalArrayBinding = (bind: ESTree.ArrayPattern, context: JSXContext): ArrayBinding => {
   const binding: ArrayBinding = {
     type: 'Array',
     binds: [],
@@ -103,7 +103,7 @@ const evalArrayBinding = (bind: ESTree.ArrayPattern, context: EvaluateContext): 
 };
 
 type DefineKind = ESTree.VariableDeclaration['kind'];
-export const setBinding = (bind: Binding, val: any, context: EvaluateContext, define?: DefineKind) => {
+export const setBinding = (bind: Binding, val: any, context: JSXContext, define?: DefineKind) => {
   switch (bind.type) {
     case 'Identifier':
       return setId(bind, val, context, define);
@@ -114,7 +114,7 @@ export const setBinding = (bind: Binding, val: any, context: EvaluateContext, de
   }
 };
 
-const setId = (id: IdentifierBinding, val: any, context: EvaluateContext, define?: DefineKind) => {
+const setId = (id: IdentifierBinding, val: any, context: JSXContext, define?: DefineKind) => {
   if (define) {
     context.defineVariable(define, id.name);
   }
@@ -122,7 +122,7 @@ const setId = (id: IdentifierBinding, val: any, context: EvaluateContext, define
   return val;
 };
 
-const setObj = (obj: ObjectBinding, val: any, context: EvaluateContext, define?: DefineKind) => {
+const setObj = (obj: ObjectBinding, val: any, context: JSXContext, define?: DefineKind) => {
   val = Object.assign({}, val);
   for (const [key, bind] of Object.entries(obj.binds)) {
     setBinding(bind, val[key], context, define);
@@ -134,7 +134,7 @@ const setObj = (obj: ObjectBinding, val: any, context: EvaluateContext, define?:
   return val;
 };
 
-const setAry = (ary: ArrayBinding, val: any, context: EvaluateContext, define?: DefineKind) => {
+const setAry = (ary: ArrayBinding, val: any, context: JSXContext, define?: DefineKind) => {
   val = [...val];
   let last = 0;
   for (let idx = 0; idx < ary.binds.length; idx++) {

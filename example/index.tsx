@@ -3,6 +3,9 @@ import './index.scss';
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
 import { render } from 'react-dom';
 import { JSXElementFilter, JSXNode, JSXRenderer, JSXRendererProps } from '../src';
+import * as exported from '../src';
+
+console.dir(Object.keys(exported));
 
 const Star: FC = ({ children }) => {
   return <p>***{children}***</p>;

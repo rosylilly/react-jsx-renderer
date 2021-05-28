@@ -1,11 +1,11 @@
 import { ESTree } from 'meriyah';
 import { Binding, ArrayBinding, evalBindingPattern, IdentifierBinding, ObjectBinding, setBinding } from './bind';
-import { EvaluateContext } from './context';
+import { JSXContext } from './context';
 import { JSXEvaluateError, JSXBreak, JSXContinue, JSXReturn } from './error';
 import { evalClassDeclaration, evalClassExpression, evalExpression } from './expression';
 import { evalFunction } from './function';
 
-export const evalStatement = (stmt: ESTree.Statement, context: EvaluateContext) => {
+export const evalStatement = (stmt: ESTree.Statement, context: JSXContext) => {
   switch (stmt.type) {
     case 'BlockStatement':
       return evalBlockStatement(stmt, context);
@@ -64,7 +64,7 @@ export const evalStatement = (stmt: ESTree.Statement, context: EvaluateContext) 
   }
 };
 
-export const evalBlockStatement = (stmt: ESTree.BlockStatement, context: EvaluateContext) => {
+export const evalBlockStatement = (stmt: ESTree.BlockStatement, context: JSXContext) => {
   const label = context.label;
 
   for (const child of stmt.body) {
@@ -87,20 +87,20 @@ export const evalBlockStatement = (stmt: ESTree.BlockStatement, context: Evaluat
   }
 };
 
-export const evalBreakStatement = (stmt: ESTree.BreakStatement, __: EvaluateContext) => {
+export const evalBreakStatement = (stmt: ESTree.BreakStatement, __: JSXContext) => {
   throw new JSXBreak(stmt.label ? stmt.label.name : undefined);
 };
 
-export const evalContinueStatement = (stmt: ESTree.ContinueStatement, __: EvaluateContext) => {
+export const evalContinueStatement = (stmt: ESTree.ContinueStatement, __: JSXContext) => {
   throw new JSXContinue(stmt.label ? stmt.label.name : undefined);
 };
 
-export const evalDebuggerStatement = (_: ESTree.DebuggerStatement, __: EvaluateContext) => {
+export const evalDebuggerStatement = (_: ESTree.DebuggerStatement, __: JSXContext) => {
   // eslint-disable-next-line no-debugger
   debugger;
 };
 
-export const evalDoWhileStatement = (stmt: ESTree.DoWhileStatement, context: EvaluateContext) => {
+export const evalDoWhileStatement = (stmt: ESTree.DoWhileStatement, context: JSXContext) => {
   const label = context.label;
 
   do {
@@ -133,13 +133,13 @@ export const evalDoWhileStatement = (stmt: ESTree.DoWhileStatement, context: Eva
   } while (evalExpression(stmt.test, context));
 };
 
-export const evalEmptyStatement = (_: ESTree.EmptyStatement, __: EvaluateContext) => {};
+export const evalEmptyStatement = (_: ESTree.EmptyStatement, __: JSXContext) => {};
 
-export const evalExportAllDeclaration = (stmt: ESTree.ExportAllDeclaration, context: EvaluateContext) => {
+export const evalExportAllDeclaration = (stmt: ESTree.ExportAllDeclaration, context: JSXContext) => {
   throw new JSXEvaluateError('export all is not supported', stmt, context);
 };
 
-export const evalExportDefaultDeclaration = (stmt: ESTree.ExportDefaultDeclaration, context: EvaluateContext) => {
+export const evalExportDefaultDeclaration = (stmt: ESTree.ExportDefaultDeclaration, context: JSXContext) => {
   const value = (() => {
     switch (stmt.declaration.type) {
       case 'FunctionDeclaration':
@@ -153,7 +153,7 @@ export const evalExportDefaultDeclaration = (stmt: ESTree.ExportDefaultDeclarati
   context.export('default', value);
 };
 
-export const evalExportNamedDeclaration = (stmt: ESTree.ExportNamedDeclaration, context: EvaluateContext) => {
+export const evalExportNamedDeclaration = (stmt: ESTree.ExportNamedDeclaration, context: JSXContext) => {
   stmt.specifiers.map((specifier) => {
     context.export(specifier.exported.name, evalExpression(specifier.local, context));
   });
@@ -187,11 +187,11 @@ export const evalExportNamedDeclaration = (stmt: ESTree.ExportNamedDeclaration, 
   }
 };
 
-export const evalExpressionStatement = (stmt: ESTree.ExpressionStatement, context: EvaluateContext) => {
+export const evalExpressionStatement = (stmt: ESTree.ExpressionStatement, context: JSXContext) => {
   evalExpression(stmt.expression, context);
 };
 
-export const evalForInStatement = (stmt: ESTree.ForInStatement, context: EvaluateContext) => {
+export const evalForInStatement = (stmt: ESTree.ForInStatement, context: JSXContext) => {
   const label = context.label;
   const right = evalExpression(stmt.right, context);
 
@@ -242,7 +242,7 @@ export const evalForInStatement = (stmt: ESTree.ForInStatement, context: Evaluat
   context.popStack();
 };
 
-export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: EvaluateContext) => {
+export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: JSXContext) => {
   const label = context.label;
   const right = evalExpression(stmt.right, context);
 
@@ -293,7 +293,7 @@ export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: Evaluat
   context.popStack();
 };
 
-export const evalForStatement = (stmt: ESTree.ForStatement, context: EvaluateContext) => {
+export const evalForStatement = (stmt: ESTree.ForStatement, context: JSXContext) => {
   const label = context.label;
   context.pushStack(undefined);
   const init = () => {
@@ -334,11 +334,11 @@ export const evalForStatement = (stmt: ESTree.ForStatement, context: EvaluateCon
   context.popStack();
 };
 
-export const evalFunctionDeclaration = (stmt: ESTree.FunctionDeclaration, context: EvaluateContext) => {
+export const evalFunctionDeclaration = (stmt: ESTree.FunctionDeclaration, context: JSXContext) => {
   return evalFunction(stmt, context);
 };
 
-export const evalIfStatement = (stmt: ESTree.IfStatement, context: EvaluateContext) => {
+export const evalIfStatement = (stmt: ESTree.IfStatement, context: JSXContext) => {
   if (evalExpression(stmt.test, context)) {
     evalStatement(stmt.consequent, context);
   } else {
@@ -346,22 +346,22 @@ export const evalIfStatement = (stmt: ESTree.IfStatement, context: EvaluateConte
   }
 };
 
-export const evalImportDeclaration = (stmt: ESTree.ImportDeclaration, context: EvaluateContext) => {
+export const evalImportDeclaration = (stmt: ESTree.ImportDeclaration, context: JSXContext) => {
   throw new JSXEvaluateError('import is not supported', stmt, context);
 };
 
-export const evalLabeledStatement = (stmt: ESTree.LabeledStatement, context: EvaluateContext) => {
+export const evalLabeledStatement = (stmt: ESTree.LabeledStatement, context: JSXContext) => {
   context.label = stmt.label.name;
   evalStatement(stmt.body, context);
   context.label = undefined;
 };
 
-export const evalReturnStatement = (stmt: ESTree.ReturnStatement, context: EvaluateContext) => {
+export const evalReturnStatement = (stmt: ESTree.ReturnStatement, context: JSXContext) => {
   const val = stmt.argument ? evalExpression(stmt.argument, context) : undefined;
   throw new JSXReturn(val);
 };
 
-export const evalSwitchStatement = (stmt: ESTree.SwitchStatement, context: EvaluateContext) => {
+export const evalSwitchStatement = (stmt: ESTree.SwitchStatement, context: JSXContext) => {
   const label = context.label;
   const discriminant = evalExpression(stmt.discriminant, context);
   let match = false;
@@ -388,11 +388,11 @@ export const evalSwitchStatement = (stmt: ESTree.SwitchStatement, context: Evalu
   }
 };
 
-export const evalThrowStatement = (stmt: ESTree.ThrowStatement, context: EvaluateContext) => {
+export const evalThrowStatement = (stmt: ESTree.ThrowStatement, context: JSXContext) => {
   throw evalExpression(stmt.argument, context);
 };
 
-export const evalTryStatement = (stmt: ESTree.TryStatement, context: EvaluateContext) => {
+export const evalTryStatement = (stmt: ESTree.TryStatement, context: JSXContext) => {
   try {
     evalStatement(stmt.block, context);
   } catch (error) {
@@ -412,7 +412,7 @@ export const evalTryStatement = (stmt: ESTree.TryStatement, context: EvaluateCon
   }
 };
 
-export const evalVariableDeclaration = (stmt: ESTree.VariableDeclaration, context: EvaluateContext) => {
+export const evalVariableDeclaration = (stmt: ESTree.VariableDeclaration, context: JSXContext) => {
   const { kind } = stmt;
 
   type Path = string | number;
@@ -499,7 +499,7 @@ export const evalVariableDeclaration = (stmt: ESTree.VariableDeclaration, contex
   });
 };
 
-export const evalWhileStatement = (stmt: ESTree.WhileStatement, context: EvaluateContext) => {
+export const evalWhileStatement = (stmt: ESTree.WhileStatement, context: JSXContext) => {
   const label = context.label;
 
   while (evalExpression(stmt.test, context)) {
@@ -532,6 +532,6 @@ export const evalWhileStatement = (stmt: ESTree.WhileStatement, context: Evaluat
   }
 };
 
-export const evalWithStatement = (stmt: ESTree.WithStatement, context: EvaluateContext) => {
+export const evalWithStatement = (stmt: ESTree.WithStatement, context: JSXContext) => {
   throw new JSXEvaluateError('with is not supported', stmt, context);
 };

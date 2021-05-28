@@ -92,7 +92,7 @@ const systemVariables = {
   false: false,
 } as const;
 
-export class EvaluateContext {
+export class JSXContext {
   public readonly options: EvaluateOptions;
   public readonly keyGenerator: KeyGenerator;
   public readonly binding: Binding;

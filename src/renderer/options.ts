@@ -1,6 +1,7 @@
+import { Options } from '../types';
 import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';
 
-export interface RenderingOptions {
+export interface RenderingOptions extends Options {
   elementFilters?: JSXElementFilter[];
   fragmentFilters?: JSXFragmentFilter[];
   textFilters?: JSXTextFilter[];
@@ -9,6 +10,4 @@ export interface RenderingOptions {
    * When this option is enabled, non-existent HTML elements will not be rendered.
    */
   disableUnknownHTMLElement?: boolean;
-
-  debug?: boolean;
 }

@@ -1,6 +1,6 @@
 import { ESTree } from 'meriyah';
 import { Binding } from '../types';
-import { EvaluateContext } from './context';
+import { JSXContext } from './context';
 import { JSXEvaluateError } from './error';
 import { evaluate } from './evaluate';
 import { EvaluateOptions } from './options';
@@ -60,7 +60,7 @@ describe('Statement', () => {
   // notSupported('WithStatement', 'with(1) { foo() }');
 
   it('should declare variable', () => {
-    const check = (context: EvaluateContext, name: string, val: any) => {
+    const check = (context: JSXContext, name: string, val: any) => {
       const attr = context.resolveIdentifier(name);
       expect(attr).toBeDefined();
       expect(attr.value).toStrictEqual(val);
