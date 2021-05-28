@@ -35,7 +35,7 @@ describe('Expression', () => {
   supported('ArrayExpression', '[1, 2, 3, , 5]', [1, 2, 3, null, 5]);
   // supported('ArrayPattern')
   notSupported('ArrowFunctionExpression', '() => {}');
-  notSupported('AssignmentExpression', 'a = 1');
+  supported('AssignmentExpression', 'a += 1', NaN);
   // notSupported('AwaitExpression', 'await promise()')
   supported('BinaryExpression', '1 + 1', 2);
   supported('CallExpression', '[1,2].join("-")', '1-2');
@@ -64,8 +64,22 @@ describe('Expression', () => {
   supported('TemplateLiteral', '`${object.foo} san`', 'foo san');
   notSupported('ThisExpression', 'this.name');
   supported('UnaryExpression', '~7.8', -8);
-  notSupported('UpdateExpression', 'i++');
+  supported('UpdateExpression', 'i++', NaN);
   // notSupported('YieldExpression', 'yield index')
+
+  it('should raise exception undefined identifier', () => {
+    expect(() => {
+      evaluateJSX('{test}', { raiseReferenceError: true });
+    }).toThrowError('test is not defined');
+
+    expect(() => {
+      evaluateJSX('{undefined}', { raiseReferenceError: true });
+    }).not.toThrowError('undefined is not defined');
+
+    expect(() => {
+      evaluateJSX('{null}', { raiseReferenceError: true });
+    }).not.toThrowError('null is not defined');
+  });
 
   it('should evaluate binary expression', () => {
     const sample = {
