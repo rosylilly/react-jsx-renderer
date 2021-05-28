@@ -12,7 +12,7 @@ export interface JSXRendererProps extends EvaluateOptions, RenderingOptions {
   fallbackComponent?: JSXFallbackComponent;
 }
 
-export const JSXRenderer: VFC<JSXRendererProps> = memo((props) => {
+const Renderer: VFC<JSXRendererProps> = (props) => {
   const { code, nodes, fallbackComponent, ...options } = props;
 
   try {
@@ -23,4 +23,7 @@ export const JSXRenderer: VFC<JSXRendererProps> = memo((props) => {
     const Fallback = fallbackComponent ? fallbackComponent : ({ error }) => <>{error.message}</>;
     return <Fallback error={error} />;
   }
-});
+};
+Renderer.displayName = 'JSXRenderer';
+
+export const JSXRenderer = memo(Renderer);

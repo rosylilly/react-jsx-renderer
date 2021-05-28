@@ -500,6 +500,7 @@ export const evalJSXElement = (jsx: ESTree.JSXElement, context: EvaluateContext)
     component,
     props: properties,
     children,
+    expression: jsx,
   };
 };
 
@@ -548,6 +549,7 @@ export const evalJSXFragment = (jsx: ESTree.JSXFragment, context: EvaluateContex
     type: 'fragment',
     props: properties,
     children,
+    expression: jsx,
   };
 };
 

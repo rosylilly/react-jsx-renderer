@@ -1,3 +1,4 @@
+import { ESTree } from 'meriyah';
 import { ComponentType, ExoticComponent } from 'react';
 
 export type JSXComponent = string | ComponentType<any> | ExoticComponent<any>;
@@ -12,10 +13,12 @@ export interface JSXChild {
 export interface JSXElement extends JSXChild {
   type: 'element';
   component: JSXComponent;
+  expression: ESTree.JSXElement;
 }
 
 export interface JSXFragment extends JSXChild {
   type: 'fragment';
+  expression: ESTree.JSXFragment;
 }
 
 export type JSXText = string | number;

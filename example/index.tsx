@@ -7,8 +7,11 @@ const Star: FC = ({ children }) => {
   return <p>***{children}***</p>;
 };
 
-const exampleHTML = `<h1>Hello, World</h1>
-<p>Hi, I'm <b style={{ color: 'red' }}>Sho Kusano</b>.</p>
+const exampleHTML = `<div>
+  <h1>Hello, World</h1>
+  <p>Hi, I'm <b style={{ color: 'red' }}>Sho Kusano</b>.</p>
+</div>
+
 <video controls src="https://samplelib.com/lib/download/mp4/sample-5s.mp4"></video>
 <p>1 + 1 = {1 + 1}</p>
 <Star>キラキラ</Star>
@@ -104,9 +107,6 @@ const App = () => {
             <h2 className="title">JSX</h2>
             <form className="form" onSubmit={(e) => e.preventDefault()}>
               <div className="field">
-                <label className="label" htmlFor="code">
-                  JSX Code
-                </label>
                 <div className="control">
                   <textarea name="code" className="textarea" rows={30} defaultValue={state.jsx} onChange={onChange} />
                 </div>
