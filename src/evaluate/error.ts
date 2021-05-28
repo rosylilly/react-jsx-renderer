@@ -19,8 +19,9 @@ export class JSXEvaluateError extends JSXError {
   public readonly context: EvaluateContext;
 
   constructor(message: string, node: ESTree.Node, context: EvaluateContext) {
-    const { loc: start } = node.loc || {};
-    super([start ? `[${start.line}:${start.column}] ` : '', `${message}`].join(''));
+    const loc = node?.loc?.start;
+    super([loc ? `[${loc.line}:${loc.column}] ` : '', `${message}`].join(''));
+
     this.node = node;
     this.context = context;
 
