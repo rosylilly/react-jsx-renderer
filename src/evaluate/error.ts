@@ -1,12 +1,27 @@
 import { ESTree } from 'meriyah';
 import { EvaluateContext } from './context';
 
-export class EvaluateError extends Error {
+class JSXError extends Error {
+  constructor(message: string) {
+    super(message);
+
+    Object.defineProperty(this, 'name', { configurable: true, enumerable: false, value: this.constructor.name, writable: false });
+    Object.setPrototypeOf(this, new.target.prototype);
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, JSXError);
+    }
+  }
+}
+
+export class JSXEvaluateError extends JSXError {
   public readonly node: ESTree.Node;
   public readonly context: EvaluateContext;
 
   constructor(message: string, node: ESTree.Node, context: EvaluateContext) {
-    super(`${message}`);
+    const loc = node?.loc?.start;
+    super([loc ? `[${loc.line}:${loc.column}] ` : '', `${message}`].join(''));
+
     this.node = node;
     this.context = context;
 
@@ -14,12 +29,12 @@ export class EvaluateError extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
 
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, EvaluateError);
+      Error.captureStackTrace(this, JSXEvaluateError);
     }
   }
 }
 
-export class JSXBreak extends Error {
+export class JSXBreak extends JSXError {
   public readonly label: string | undefined;
 
   constructor(label?: string) {
@@ -30,7 +45,7 @@ export class JSXBreak extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
 
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, EvaluateError);
+      Error.captureStackTrace(this, JSXBreak);
     }
   }
 
@@ -39,7 +54,7 @@ export class JSXBreak extends Error {
   }
 }
 
-export class JSXContinue extends Error {
+export class JSXContinue extends JSXError {
   public readonly label: string | undefined;
 
   constructor(label?: string) {
@@ -50,7 +65,7 @@ export class JSXContinue extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
 
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, EvaluateError);
+      Error.captureStackTrace(this, JSXContinue);
     }
   }
 
@@ -59,7 +74,7 @@ export class JSXContinue extends Error {
   }
 }
 
-export class JSXReturn extends Error {
+export class JSXReturn extends JSXError {
   public readonly value: any;
 
   constructor(value: any) {
@@ -70,7 +85,14 @@ export class JSXReturn extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
 
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, EvaluateError);
+      Error.captureStackTrace(this, JSXReturn);
     }
   }
 }
+
+export const wrapJSXError = (e: any, node: ESTree.Node, context: EvaluateContext): JSXError => {
+  if (e instanceof JSXError) return e;
+  const error = e instanceof Error ? e : new Error(e);
+  const jsxError = new JSXEvaluateError(error.message, node, context);
+  return jsxError;
+};

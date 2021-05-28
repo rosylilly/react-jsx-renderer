@@ -1,6 +1,6 @@
 import { ESTree } from 'meriyah';
 import { Binding } from '../types';
-import { EvaluateError } from './error';
+import { JSXEvaluateError } from './error';
 import { evaluateJSX } from './evaluate';
 import { EvaluateOptions } from './options';
 
@@ -28,7 +28,7 @@ describe('Expression', () => {
 
   const notSupported = (name: ESTree.Expression['type'], code: string, options: EvaluateOptions = {}) => {
     it(`should not be supported: ${name}`, () => {
-      expect(() => evaluateJSX(`{${code}}`, { ...options, binding })).toThrowError(EvaluateError);
+      expect(() => evaluateJSX(`{${code}}`, { ...options, binding })).toThrowError(JSXEvaluateError);
     });
   };
 
@@ -47,9 +47,9 @@ describe('Expression', () => {
   supported('Identifier', 'name', 'rosylilly');
   // notSupported('Import', 'import test as "test";');
   notSupported('ImportExpression', 'import("test")');
-  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', props: { key: '1' }, children: ['test'] });
-  supported('JSXFragment', '<>test</>', { type: 'fragment', props: { key: '1' }, children: ['test'] });
-  supported('JSXSpreadChild', '...[1, 2, 3]', { children: [1, 2, 3], props: { key: '1' }, type: 'fragment' });
+  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', props: { key: '1' }, children: ['test'], loc: { column: 3, line: 1 } });
+  supported('JSXFragment', '<>test</>', { type: 'fragment', props: { key: '1' }, children: ['test'], loc: { column: 3, line: 1 } });
+  supported('JSXSpreadChild', '...[1, 2, 3]', { children: [1, 2, 3], props: { key: '1' }, type: 'fragment', loc: undefined });
   supported('Literal', '1.45', 1.45);
   supported('LogicalExpression', 'true && false || true', true);
   supported('MemberExpression', 'object.foo', 'foo');

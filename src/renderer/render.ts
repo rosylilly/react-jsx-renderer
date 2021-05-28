@@ -1,7 +1,9 @@
+import { ESTree } from 'meriyah';
 import { createElement, Fragment, ReactNode } from 'react';
 import { JSXNode, JSXElement, JSXFragment, JSXText } from '../types';
 import { RenderingOptions } from './options';
 
+const fileName = 'jsx';
 const unknownElementCache = new Map<string, boolean>();
 
 export const renderJSX = (node: JSXNode, options: RenderingOptions): ReactNode => {
@@ -44,14 +46,30 @@ const renderJSXElement = (element: JSXElement, options: RenderingOptions): React
     if (unknownElementCache.get(component)) return undefined;
   }
 
-  return createElement(filtered.component, filtered.props, ...filtered.children.map((child) => renderJSX(child, options)));
+  return createElement(
+    filtered.component,
+    {
+      ...filtered.props,
+      __self: this,
+      ...renderSourcePosition(element.loc, options),
+    },
+    ...filtered.children.map((child) => renderJSX(child, options)),
+  );
 };
 
 const renderJSXFragment = (fragment: JSXFragment, options: RenderingOptions): ReactNode => {
   const filtered = applyFilter(options.fragmentFilters || [], fragment);
 
   if (filtered) {
-    return createElement(Fragment, filtered.props, ...filtered.children.map((child) => renderJSX(child, options)));
+    return createElement(
+      Fragment,
+      {
+        ...filtered.props,
+        __self: this,
+        ...renderSourcePosition(fragment.loc, options),
+      },
+      ...filtered.children.map((child) => renderJSX(child, options)),
+    );
   } else {
     return undefined;
   }
@@ -59,4 +77,16 @@ const renderJSXFragment = (fragment: JSXFragment, options: RenderingOptions): Re
 
 const applyFilter = <T extends JSXNode>(filters: ((target: T) => T | undefined)[], node: T): T | undefined => {
   return filters.reduce<T | undefined>((prev, filter) => (prev ? filter(prev) : undefined), node);
+};
+
+type SourcePosition = {
+  __source: {
+    fileName: string;
+    lineNumber?: number;
+    columnNumber?: number;
+  };
+};
+
+const renderSourcePosition = (loc: ESTree.Position | undefined, _options: RenderingOptions): SourcePosition | Record<string, never> => {
+  return loc ? { __source: { fileName, lineNumber: loc.line, columnNumber: loc.column } } : { __source: { fileName } };
 };

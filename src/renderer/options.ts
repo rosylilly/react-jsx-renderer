@@ -9,4 +9,6 @@ export interface RenderingOptions {
    * When this option is enabled, non-existent HTML elements will not be rendered.
    */
   disableUnknownHTMLElement?: boolean;
+
+  debug?: boolean;
 }
