@@ -224,6 +224,8 @@ export const evalBinaryExpression = (exp: ESTree.BinaryExpression, context: Eval
 };
 
 export const evalCallExpression = (exp: ESTree.CallExpression, context: EvaluateContext) => {
+  if (context.options.disableCall) return undefined;
+
   const { callee } = exp;
   const receiver = callee.type === 'MemberExpression' ? evalExpression(callee.object, context) : undefined;
   const method = evalExpression(callee, context) as (...args: any[]) => any;
@@ -312,6 +314,8 @@ export const evalMetaProperty = (exp: ESTree.MetaProperty, context: EvaluateCont
 };
 
 export const evalNewExpression = (exp: ESTree.NewExpression, context: EvaluateContext) => {
+  if (context.options.disableCall || context.options.disableNew) return undefined;
+
   const callee = evalExpression(exp.callee, context);
   const arugments = exp.arguments.map((arg) => evalExpression(arg, context));
   return new callee(...arugments);

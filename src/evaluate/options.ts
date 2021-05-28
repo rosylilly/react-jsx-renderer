@@ -11,6 +11,8 @@ export interface EvaluateOptions {
   keyPrefix?: string;
 
   disableSearchCompontsByBinding?: boolean;
+  disableCall?: boolean;
+  disableNew?: boolean;
   raiseReferenceError?: boolean;
 
   debug?: boolean;

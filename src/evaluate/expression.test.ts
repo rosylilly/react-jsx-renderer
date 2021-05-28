@@ -163,4 +163,10 @@ describe('Expression', () => {
     const defaultParamRet = evaluateJSX('{(function (a, b = 2) { return a + b + 100 })(200)}')[0];
     expect(defaultParamRet).toStrictEqual(302);
   });
+
+  it('should be activatable disable call', () => {
+    expect(evaluateJSX('{(() => 1)()}', { disableCall: true })[0]).toBeUndefined();
+    expect(evaluateJSX('{"hello".toString()}', { disableCall: true })[0]).toBeUndefined();
+    expect(evaluateJSX('{new Date()}', { disableCall: true })[0]).toBeUndefined();
+  });
 });
