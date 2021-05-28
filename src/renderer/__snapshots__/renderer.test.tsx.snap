@@ -2,9 +2,9 @@
 
 exports[`JSX should catch error of syntax 1`] = `"[1:11]: Unexpected token"`;
 
-exports[`JSX should catch error with number object 1`] = `"1"`;
+exports[`JSX should catch error with number object 1`] = `"[1:6] 1"`;
 
-exports[`JSX should catch error with object 1`] = `"[object Object]"`;
+exports[`JSX should catch error with object 1`] = `"[1:6] [object Object]"`;
 
 exports[`JSX should render JSX 1`] = `
 Array [

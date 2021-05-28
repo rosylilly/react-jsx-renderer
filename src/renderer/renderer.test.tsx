@@ -118,5 +118,5 @@ describe('JSX', () => {
       word
     </p>,
   );
-  test('<p>{exception()}</p>', <div>{'Hello'} is raised</div>);
+  test('<p>{exception()}</p>', <div>{'[1:6] Hello'} is raised</div>);
 });
