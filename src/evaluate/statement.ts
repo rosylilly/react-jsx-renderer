@@ -1,7 +1,7 @@
 import { ESTree } from 'meriyah';
 import { Binding, ArrayBinding, evalBindingPattern, IdentifierBinding, ObjectBinding, setBinding } from './bind';
 import { EvaluateContext } from './context';
-import { EvaluateError, JSXBreak, JSXContinue, JSXReturn } from './error';
+import { JSXEvaluateError, JSXBreak, JSXContinue, JSXReturn } from './error';
 import { evalClassDeclaration, evalClassExpression, evalExpression } from './expression';
 import { evalFunction } from './function';
 
@@ -60,7 +60,7 @@ export const evalStatement = (stmt: ESTree.Statement, context: EvaluateContext) 
     case 'WithStatement':
       return evalWithStatement(stmt, context);
     default:
-      throw new EvaluateError('Not implemented statement', stmt, context);
+      throw new JSXEvaluateError('Not implemented statement', stmt, context);
   }
 };
 
@@ -136,7 +136,7 @@ export const evalDoWhileStatement = (stmt: ESTree.DoWhileStatement, context: Eva
 export const evalEmptyStatement = (_: ESTree.EmptyStatement, __: EvaluateContext) => {};
 
 export const evalExportAllDeclaration = (stmt: ESTree.ExportAllDeclaration, context: EvaluateContext) => {
-  throw new EvaluateError('export all is not supported', stmt, context);
+  throw new JSXEvaluateError('export all is not supported', stmt, context);
 };
 
 export const evalExportDefaultDeclaration = (stmt: ESTree.ExportDefaultDeclaration, context: EvaluateContext) => {
@@ -347,7 +347,7 @@ export const evalIfStatement = (stmt: ESTree.IfStatement, context: EvaluateConte
 };
 
 export const evalImportDeclaration = (stmt: ESTree.ImportDeclaration, context: EvaluateContext) => {
-  throw new EvaluateError('import is not supported', stmt, context);
+  throw new JSXEvaluateError('import is not supported', stmt, context);
 };
 
 export const evalLabeledStatement = (stmt: ESTree.LabeledStatement, context: EvaluateContext) => {
@@ -533,5 +533,5 @@ export const evalWhileStatement = (stmt: ESTree.WhileStatement, context: Evaluat
 };
 
 export const evalWithStatement = (stmt: ESTree.WithStatement, context: EvaluateContext) => {
-  throw new EvaluateError('with is not supported', stmt, context);
+  throw new JSXEvaluateError('with is not supported', stmt, context);
 };

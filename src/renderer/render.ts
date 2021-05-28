@@ -51,7 +51,7 @@ const renderJSXElement = (element: JSXElement, options: RenderingOptions): React
     {
       ...filtered.props,
       __self: this,
-      ...renderSourcePosition(element.expression, options),
+      ...renderSourcePosition(element.loc, options),
     },
     ...filtered.children.map((child) => renderJSX(child, options)),
   );
@@ -66,7 +66,7 @@ const renderJSXFragment = (fragment: JSXFragment, options: RenderingOptions): Re
       {
         ...filtered.props,
         __self: this,
-        ...renderSourcePosition(fragment.expression, options),
+        ...renderSourcePosition(fragment.loc, options),
       },
       ...filtered.children.map((child) => renderJSX(child, options)),
     );
@@ -87,8 +87,6 @@ type SourcePosition = {
   };
 };
 
-const renderSourcePosition = (expression: ESTree.JSXElement | ESTree.JSXFragment, _options: RenderingOptions): SourcePosition | Record<string, never> => {
-  const { start } = expression.loc || {};
-
-  return start ? { __source: { fileName, lineNumber: start.line, columnNumber: start.column } } : { __source: { fileName } };
+const renderSourcePosition = (loc: ESTree.Position | undefined, _options: RenderingOptions): SourcePosition | Record<string, never> => {
+  return loc ? { __source: { fileName, lineNumber: loc.line, columnNumber: loc.column } } : { __source: { fileName } };
 };

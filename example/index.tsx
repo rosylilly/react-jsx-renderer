@@ -1,7 +1,8 @@
 import 'bulma/bulma.sass';
+import './index.scss';
 import { ChangeEventHandler, FC, useCallback, useState } from 'react';
 import { render } from 'react-dom';
-import { evaluateJSX, JSXElementFilter, JSXRenderer, JSXRendererProps } from '../src';
+import { JSXElementFilter, JSXNode, JSXRenderer, JSXRendererProps } from '../src';
 
 const Star: FC = ({ children }) => {
   return <p>***{children}***</p>;
@@ -20,7 +21,7 @@ const exampleHTML = `<div>
 
 <h2>XSS Test</h2>
 <p>Look your console logs</p>
-{1..constructor.constructor('console.log("XSS Now: " + Date.now())')()}
+{1..constructor.constructor('console.log("JSX now  : " + Date.now())')()}
 `;
 
 const exampleBinding = {
@@ -53,6 +54,7 @@ const exampleFilters: JSXElementFilter[] = [
 ];
 
 const defaultOptions: Omit<JSXRendererProps, 'code' | 'nodes'> = {
+  debug: true,
   disableUnknownHTMLElement: false,
   disableCall: false,
   disableNew: false,
@@ -60,9 +62,15 @@ const defaultOptions: Omit<JSXRendererProps, 'code' | 'nodes'> = {
 };
 
 const App = () => {
-  const [_, ticker] = useState(0);
+  const [now, ticker] = useState(Date.now());
   const [options, updateOptions] = useState(defaultOptions);
-  const [state, update] = useState({ jsx: exampleHTML });
+  const [state, update] = useState<{ jsx: string; nodes: JSXNode[] }>({ jsx: exampleHTML, nodes: [] });
+  const nodes = useCallback(
+    (nodes: JSXNode[]) => {
+      update((s) => ({ ...s, nodes }));
+    },
+    [update],
+  );
 
   const onChange = useCallback<ChangeEventHandler<HTMLTextAreaElement>>(
     (e) => {
@@ -70,15 +78,18 @@ const App = () => {
     },
     [update],
   );
+
   const fullOptions = {
-    binding: exampleBinding,
+    binding: {
+      ...exampleBinding,
+      now,
+    },
     components: exampleComponents,
     elementFilters: exampleFilters,
     ...options,
   };
 
-  const nodes = evaluateJSX(state.jsx, fullOptions);
-  const json = JSON.stringify(nodes, null, 2);
+  const json = JSON.stringify(state.nodes, null, 2);
 
   return (
     <>
@@ -140,7 +151,7 @@ const App = () => {
                     className="button is-info is-fullwidth"
                     onClick={(e) => {
                       e.preventDefault();
-                      ticker((t) => t + 1);
+                      ticker(() => Date.now());
                     }}
                   >
                     Redraw
@@ -152,11 +163,11 @@ const App = () => {
           <div className="column">
             <h2 className="title">Preview</h2>
             <div className="box content">
-              <JSXRenderer nodes={nodes} {...fullOptions} />
+              <JSXRenderer code={state.jsx} refNodes={nodes} {...fullOptions} />
             </div>
             <h2 className="subtitle">Preview JSON</h2>
             <pre className="box">
-              <code>{json}</code>
+              <code className="source-code">{json}</code>
             </pre>
           </div>
         </div>

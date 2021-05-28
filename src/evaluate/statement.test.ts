@@ -1,7 +1,7 @@
 import { ESTree } from 'meriyah';
 import { Binding } from '../types';
 import { EvaluateContext } from './context';
-import { EvaluateError } from './error';
+import { JSXEvaluateError } from './error';
 import { evaluate } from './evaluate';
 import { EvaluateOptions } from './options';
 
@@ -28,7 +28,7 @@ describe('Statement', () => {
 
   const notSupported = (name: ESTree.Statement['type'], code: string, options: EvaluateOptions = {}) => {
     it(`should not be supported: ${name}`, () => {
-      expect(() => evaluate(code, { ...options, binding })).toThrowError(EvaluateError);
+      expect(() => evaluate(code, { ...options, binding })).toThrowError(JSXEvaluateError);
     });
   };
 

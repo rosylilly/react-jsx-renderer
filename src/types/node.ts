@@ -13,12 +13,12 @@ export interface JSXChild {
 export interface JSXElement extends JSXChild {
   type: 'element';
   component: JSXComponent;
-  expression: ESTree.JSXElement;
+  loc?: ESTree.Position;
 }
 
 export interface JSXFragment extends JSXChild {
   type: 'fragment';
-  expression: ESTree.JSXFragment;
+  loc?: ESTree.Position;
 }
 
 export type JSXText = string | number;
