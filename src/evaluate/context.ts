@@ -68,10 +68,6 @@ class Stack {
     }
   }
 
-  public has(name: string): boolean {
-    return this.variables.has(name);
-  }
-
   public get(name: string): Variable | undefined {
     return this.variables.get(name) || (this.parent ? this.parent.get(name) : undefined);
   }
@@ -110,7 +106,7 @@ export class JSXContext {
     this.binding = options.binding || {};
     this.components = options.components || {};
 
-    this.stack = new Stack(new Stack(undefined, undefined, systemVariables), undefined, this.binding || {});
+    this.stack = new Stack(new Stack(undefined, undefined, systemVariables), undefined, this.binding);
     this.exports = {};
   }
 
@@ -133,10 +129,7 @@ export class JSXContext {
   }
 
   public setVariable(name: string, value: any) {
-    const variable = this.resolveIdentifier(name);
-    if (variable) {
-      variable.value = value;
-    }
+    this.stack.set(name, value);
   }
 
   public resolveThis(): any {

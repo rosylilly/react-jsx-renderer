@@ -15,45 +15,53 @@ export interface PathBinding {
 export interface ObjectBinding {
   type: 'Object';
   binds: PathBinding;
-  rest: IdentifierBinding | null;
+  rest: RestBinding | null;
   default?: any;
 }
 
 export interface ArrayBinding {
   type: 'Array';
   binds: (Binding | null)[];
-  rest: IdentifierBinding | null;
+  rest: RestBinding | null;
   default?: any;
 }
 
-export type Binding = IdentifierBinding | ObjectBinding | ArrayBinding;
+export interface RestBinding {
+  type: 'Rest';
+  bind: Binding;
+  default?: any;
+}
+
+export interface MemberBinding {
+  type: 'Member';
+  object: any;
+  property: string;
+  default?: any;
+}
+
+export type Binding = IdentifierBinding | ObjectBinding | ArrayBinding | RestBinding | MemberBinding;
 
 export const evalBindingPattern = (bind: ESTree.BindingPattern | ESTree.AssignmentPattern | ESTree.Expression, context: JSXContext): Binding => {
   switch (bind.type) {
     case 'Identifier':
       return evalIdentifierBinding(bind, context);
-    case 'ObjectPattern':
-      return evalObjectBinding(bind, context);
-    case 'ArrayPattern':
-      return evalArrayBinding(bind, context);
-    case 'AssignmentPattern': {
-      const binding = evalBindingPattern(bind.left, context);
-      binding.default = bind.right ? evalExpression(bind.right, context) : undefined;
-      return binding;
-    }
+    case 'AssignmentPattern':
+      return evalAssignmentPattern(bind, context);
+    case 'MemberExpression':
+      return evalMemberBinding(bind, context);
     default:
       return evalExpression(bind, context);
   }
 };
 
-const evalIdentifierBinding = (bind: ESTree.Identifier, _: JSXContext): IdentifierBinding => {
+export const evalIdentifierBinding = (bind: ESTree.Identifier, _: JSXContext): IdentifierBinding => {
   return {
     type: 'Identifier',
     name: bind.name,
   };
 };
 
-const evalObjectBinding = (bind: ESTree.ObjectPattern, context: JSXContext): ObjectBinding => {
+export const evalObjectPattern = (bind: ESTree.ObjectPattern, context: JSXContext): ObjectBinding => {
   const binding: ObjectBinding = {
     type: 'Object',
     binds: {},
@@ -63,13 +71,13 @@ const evalObjectBinding = (bind: ESTree.ObjectPattern, context: JSXContext): Obj
   bind.properties.forEach((prop) => {
     switch (prop.type) {
       case 'Property': {
-        const key = prop.key.type === 'Identifier' ? prop.key.name : '';
-        const val = evalBindingPattern(prop.value as ESTree.BindingPattern, context);
+        const key = prop.key.type === 'Identifier' ? prop.key.name : evalExpression(prop.key, context);
+        const val = evalBindingPattern(prop.value, context);
         binding.binds[key] = val;
         break;
       }
       case 'RestElement': {
-        binding.rest = prop.argument.type === 'Identifier' ? evalIdentifierBinding(prop.argument, context) : null;
+        binding.rest = evalRestElement(prop, context);
       }
     }
   });
@@ -77,7 +85,7 @@ const evalObjectBinding = (bind: ESTree.ObjectPattern, context: JSXContext): Obj
   return binding;
 };
 
-const evalArrayBinding = (bind: ESTree.ArrayPattern, context: JSXContext): ArrayBinding => {
+export const evalArrayPattern = (bind: ESTree.ArrayPattern, context: JSXContext): ArrayBinding => {
   const binding: ArrayBinding = {
     type: 'Array',
     binds: [],
@@ -92,7 +100,7 @@ const evalArrayBinding = (bind: ESTree.ArrayPattern, context: JSXContext): Array
 
     switch (element.type) {
       case 'RestElement':
-        binding.rest = element.argument.type === 'Identifier' ? evalIdentifierBinding(element.argument, context) : null;
+        binding.rest = evalRestElement(element, context);
         break;
       default:
         binding.binds.push(evalBindingPattern(element, context));
@@ -102,30 +110,59 @@ const evalArrayBinding = (bind: ESTree.ArrayPattern, context: JSXContext): Array
   return binding;
 };
 
+export const evalAssignmentPattern = (bind: ESTree.AssignmentPattern, context: JSXContext) => {
+  const binding = evalBindingPattern(bind.left, context);
+  binding.default = bind.right ? evalExpression(bind.right, context) : undefined;
+  return binding;
+};
+
+export const evalRestElement = (bind: ESTree.RestElement, context: JSXContext): RestBinding => {
+  return {
+    type: 'Rest',
+    bind: evalBindingPattern(bind.argument, context),
+    default: undefined,
+  };
+};
+
+export const evalMemberBinding = (bind: ESTree.MemberExpression, context: JSXContext): MemberBinding => {
+  const property =
+    bind.property.type === 'Identifier' ? bind.property.name : bind.property.type === 'PrivateIdentifier' ? bind.property.name : evalExpression(bind.property, context);
+
+  return {
+    type: 'Member',
+    object: evalExpression(bind.object, context),
+    property,
+  };
+};
+
 type DefineKind = ESTree.VariableDeclaration['kind'];
+
 export const setBinding = (bind: Binding, val: any, context: JSXContext, define?: DefineKind) => {
   switch (bind.type) {
     case 'Identifier':
-      return setId(bind, val, context, define);
+      return setIdentifierBinding(bind, val, context, define);
     case 'Object':
-      return setObj(bind, val, context, define);
+      return setObjectBinding(bind, val, context, define);
     case 'Array':
-      return setAry(bind, val, context, define);
+      return setArrayBinding(bind, val, context, define);
+    case 'Rest':
+      return setBinding(bind.bind, val, context, define);
+    case 'Member':
+      return setMemberBinding(bind, val, context, define);
   }
 };
 
-const setId = (id: IdentifierBinding, val: any, context: JSXContext, define?: DefineKind) => {
-  if (define) {
-    context.defineVariable(define, id.name);
-  }
-  context.setVariable(id.name, val);
+const setIdentifierBinding = (id: IdentifierBinding, val: any, context: JSXContext, define?: DefineKind) => {
+  if (define) context.defineVariable(define, id.name);
+  val !== undefined && context.setVariable(id.name, val);
   return val;
 };
 
-const setObj = (obj: ObjectBinding, val: any, context: JSXContext, define?: DefineKind) => {
+const setObjectBinding = (obj: ObjectBinding, val: any, context: JSXContext, define?: DefineKind) => {
   val = Object.assign({}, val);
   for (const [key, bind] of Object.entries(obj.binds)) {
-    setBinding(bind, val[key], context, define);
+    const value = val[key] === undefined ? bind.default : val[key];
+    setBinding(bind, value, context, define);
     delete val[key];
   }
   if (obj.rest) {
@@ -134,19 +171,25 @@ const setObj = (obj: ObjectBinding, val: any, context: JSXContext, define?: Defi
   return val;
 };
 
-const setAry = (ary: ArrayBinding, val: any, context: JSXContext, define?: DefineKind) => {
-  val = [...val];
-  let last = 0;
+const setArrayBinding = (ary: ArrayBinding, val: any, context: JSXContext, define?: DefineKind) => {
+  const values = [...val] as any[];
   for (let idx = 0; idx < ary.binds.length; idx++) {
     const bind = ary.binds[idx];
-    last = idx;
+    const value = values.shift();
     if (!bind) continue;
 
-    setBinding(bind, val[idx], context, define);
+    setBinding(bind, value === undefined ? bind.default : value, context, define);
   }
 
   if (ary.rest) {
-    setBinding(ary.rest, val.slice(last + 1), context, define);
+    setBinding(ary.rest, values, context, define);
   }
+  return val;
+};
+
+const setMemberBinding = (binding: MemberBinding, val: any, context: JSXContext, _define?: DefineKind) => {
+  context.pushStack(binding.object);
+  binding.object[binding.property] = val;
+  context.popStack();
   return val;
 };

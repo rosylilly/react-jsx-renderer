@@ -1,8 +1,9 @@
 import { ESTree } from 'meriyah';
-import { Binding, ArrayBinding, evalBindingPattern, IdentifierBinding, ObjectBinding, setBinding } from './bind';
+import { Binding, evalBindingPattern, setBinding } from './bind';
+import { evalClassDeclaration, evalClassExpression } from './class';
 import { JSXContext } from './context';
-import { JSXEvaluateError, JSXBreak, JSXContinue, JSXReturn } from './error';
-import { evalClassDeclaration, evalClassExpression, evalExpression } from './expression';
+import { JSXBreak, JSXContinue, JSXEvaluateError, JSXReturn } from './error';
+import { evalExpression } from './expression';
 import { evalFunction } from './function';
 
 export const evalStatement = (stmt: ESTree.Statement, context: JSXContext) => {
@@ -204,9 +205,9 @@ export const evalForInStatement = (stmt: ESTree.ForInStatement, context: JSXCont
 
     switch (stmt.left.type) {
       case 'VariableDeclaration': {
-        const [bind] = evalVariableDeclaration(stmt.left, context);
+        const [bind] = stmt.left.declarations.map((dec) => evalBindingPattern(dec.id, context));
         if (bind) {
-          setBinding(bind, iter, context);
+          setBinding(bind, iter, context, stmt.left.kind);
         }
         break;
       }
@@ -255,9 +256,9 @@ export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: JSXCont
 
     switch (stmt.left.type) {
       case 'VariableDeclaration': {
-        const [bind] = evalVariableDeclaration(stmt.left, context);
+        const [bind] = stmt.left.declarations.map((dec) => evalBindingPattern(dec.id, context));
         if (bind) {
-          setBinding(bind, iter, context);
+          setBinding(bind, iter, context, stmt.left.kind);
         }
         break;
       }
@@ -297,7 +298,7 @@ export const evalForOfStatement = (stmt: ESTree.ForOfStatement, context: JSXCont
 
 export const evalForStatement = (stmt: ESTree.ForStatement, context: JSXContext) => {
   const label = context.label;
-  context.pushStack(undefined);
+  context.pushStack(context.resolveThis());
   const init = () => {
     if (stmt.init) {
       switch (stmt.init.type) {
@@ -428,86 +429,9 @@ export const evalTryStatement = (stmt: ESTree.TryStatement, context: JSXContext)
 export const evalVariableDeclaration = (stmt: ESTree.VariableDeclaration, context: JSXContext) => {
   const { kind } = stmt;
 
-  type Path = string | number;
-  const define = (id: IdentifierBinding, paths?: Path[], init?: any) => {
-    context.defineVariable(kind, id.name);
-    if (paths) {
-      const val = paths.reduce((val, name, idx) => {
-        const ret = val[name];
-        if (idx === paths.length - 1) delete val[name];
-        return ret;
-      }, init);
-      context.setVariable(id.name, val !== undefined ? val : id.default);
-    } else {
-      id.default && context.setVariable(id.name, id.default);
-    }
-  };
-
-  const defineObj = (binding: ObjectBinding, init: any, prefixes: Path[] = []) => {
-    for (const [key, bind] of Object.entries(binding.binds)) {
-      switch (bind.type) {
-        case 'Identifier':
-          define(bind, [...prefixes, key], init);
-          break;
-        case 'Object':
-          defineObj(bind, init, [...prefixes, key]);
-          break;
-        case 'Array':
-          defineAry(bind, init, [...prefixes, key]);
-      }
-    }
-    if (binding.rest) {
-      define(binding.rest, [...prefixes], init);
-    }
-  };
-
-  const defineAry = (binding: ArrayBinding, init: any, prefixes: Path[] = []) => {
-    let lastIdx = 0;
-    for (let idx = 0; idx < binding.binds.length; idx++) {
-      const bind = binding.binds[idx];
-      lastIdx = idx;
-      if (!bind) continue;
-
-      switch (bind.type) {
-        case 'Identifier':
-          define(bind, [...prefixes, idx], init);
-          break;
-        case 'Object':
-          defineObj(bind, init, [...prefixes, idx]);
-          break;
-        case 'Array':
-          defineAry(bind, init, [...prefixes, idx]);
-          break;
-      }
-    }
-    if (binding.rest) {
-      const array = Array.from(prefixes.reduce((val, part) => val[part], init));
-      define(binding.rest, [], array.slice(lastIdx + 1));
-    }
-  };
-
   return stmt.declarations.map((declaration) => {
     const binding = evalBindingPattern(declaration.id, context);
-    switch (binding.type) {
-      case 'Identifier': {
-        if (declaration.init) {
-          define(binding, [], evalExpression(declaration.init, context));
-        } else {
-          define(binding);
-        }
-        break;
-      }
-      case 'Object': {
-        const init = Object.assign({}, declaration.init ? evalExpression(declaration.init, context) : {});
-        defineObj(binding, init);
-        break;
-      }
-      case 'Array': {
-        const init = declaration.init ? [...evalExpression(declaration.init, context)] : [];
-        defineAry(binding, init);
-        break;
-      }
-    }
+    setBinding(binding, declaration.init ? evalExpression(declaration.init, context) : undefined, context, kind);
     return binding;
   });
 };

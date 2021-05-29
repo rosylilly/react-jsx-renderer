@@ -31,7 +31,9 @@ export class JSXEvaluateError extends JSXError {
     Object.defineProperty(this, 'name', { configurable: true, enumerable: false, value: this.constructor.name, writable: false });
     Object.setPrototypeOf(this, new.target.prototype);
 
-    if (Error.captureStackTrace) {
+    if (this.source) {
+      this.stack = this.source.stack;
+    } else if (Error.captureStackTrace) {
       Error.captureStackTrace(this, JSXEvaluateError);
     }
   }

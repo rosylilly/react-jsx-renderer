@@ -13,13 +13,13 @@
     "sourceMap": true,
     "outDir": "./dist/dts",
 
-    "strict": true,
+    "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
-    "noImplicitThis": true,
+    "noImplicitThis": false,
     "alwaysStrict": true,
 
     "noUnusedLocals": true,

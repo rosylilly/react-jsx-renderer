@@ -34,7 +34,7 @@ describe('Statement', () => {
 
   supported('BlockStatement', '{ 1 }');
   supported('BreakStatement', 'for (;;) { break; }');
-  notSupported('ClassDeclaration', 'class Foo {}');
+  supported('ClassDeclaration', 'class Foo {}');
   // notSupported('ClassExpression', 'export default class {}', { meriyah: { module: true }});
   supported('ContinueStatement', 'let i = 0; while (i < 1) { i++; continue }');
   supported('DebuggerStatement', 'debugger;');
@@ -412,5 +412,134 @@ describe('Statement', () => {
       'for in 1',
       'for in 2',
     ]);
+  });
+
+  it('should evaluate complex assignments', () => {
+    const context = evaluate(`
+      const a = 1;
+      const { b } = { b: 2 };
+      const [c] = [3];
+      const { ['d' + 'd' ]: d } = { dd: 4 };
+      const e = ((a) => a)(5);
+      const f = (({ a }) => a)({ a: 6 });
+      const g = (([a]) => a)([7]);
+      const h = (({ ['d' + 'd']: a }) => a)({ dd: 8 });
+      const i = (({ a, ...b }) => b)({ a: 9, b: 9 });
+      const j = (([a, ...b]) => b)([10, 10, 10]);
+      const k = ((a, ...b) => b)(11, 11, 11);
+      const [, l] = [11, 12];
+      const m = ((a = 13) => a)();
+      const [n = 14] = [];
+      const { o = 15 } = {};
+    `);
+
+    const expects = {
+      a: 1,
+      b: 2,
+      c: 3,
+      d: 4,
+      e: 5,
+      f: 6,
+      g: 7,
+      h: 8,
+      i: { b: 9 },
+      j: [10, 10],
+      k: [11, 11],
+      l: 12,
+      m: 13,
+      n: 14,
+      o: 15,
+    };
+    for (const [key, val] of Object.entries(expects)) {
+      expect(context.resolveIdentifier(key).value).toStrictEqual(val);
+    }
+  });
+
+  it('should evaluate complex object', () => {
+    evaluate(
+      `
+        const object = {
+          a: 1,
+          get b() { return 2 },
+          set c(v) {
+            this.d = v;
+          },
+          e(v) { return v + this.b; }
+        };
+        expect(object.a).toStrictEqual(1);
+        expect(object.b).toStrictEqual(2);
+        object.c = 3;
+        expect(object.d).toStrictEqual(3);
+        expect(object.e(2)).toStrictEqual(4);
+      `,
+      { binding: { expect } },
+    );
+  });
+
+  it('should evaluate class', () => {
+    evaluate(
+      `
+        class Animal {
+          weight = 6;
+          #privateProp = 8;
+          ['a' + 2] = 10;
+          constructor(name) {
+            this.name = name;
+            this.age = 3;
+          }
+          foo() {
+            return 2;
+          }
+          get yearsOld() {
+            return this.age
+          }
+          set yearsOld(a) {
+            this.age = a;
+          }
+          static walk() { return 5 }
+          publicMethod() {
+            return this.#privateMethod();
+          }
+          #privateMethod() { return 7 }
+          get publicProp() {
+            return this.#privateProp;
+          }
+          ['a' + 1]() {
+            return 9;
+          }
+        }
+
+        class Dog extends Animal {
+          constructor() {
+            super('dog');
+          }
+        }
+
+        const animal = new Animal('bird');
+        expect(animal.name).toStrictEqual('bird');
+        expect(animal.foo()).toStrictEqual(2);
+        expect(animal.yearsOld).toStrictEqual(3);
+        animal.yearsOld = 4;
+        expect(animal.yearsOld).toStrictEqual(4);
+        expect(Animal.walk()).toStrictEqual(5);
+        expect(animal.weight).toStrictEqual(6);
+        expect(animal.publicMethod()).toStrictEqual(7);
+        expect(animal.publicProp).toStrictEqual(8);
+        expect(animal.a1()).toStrictEqual(9);
+        expect(animal.a2).toStrictEqual(10);
+
+        const dog = new Dog();
+        expect(dog.name).toStrictEqual('dog');
+      `,
+      {
+        meriyah: {
+          next: true,
+        },
+        binding: {
+          expect,
+          console,
+        },
+      },
+    );
   });
 });
