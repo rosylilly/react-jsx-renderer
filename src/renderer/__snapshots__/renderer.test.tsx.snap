@@ -1,12 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JSX should catch error of syntax 1`] = `"[1:11]: Unexpected token"`;
+exports[`JSXRenderer should call Fallback Component on parse error 1`] = `"notFound is not a function"`;
 
-exports[`JSX should catch error with number object 1`] = `"[1:6] 1"`;
+exports[`JSXRenderer should call console.error on debug mode 1`] = `"[1:9] foo is not a function"`;
 
-exports[`JSX should catch error with object 1`] = `"[1:6] [object Object]"`;
+exports[`JSXRenderer should call console.group on debug mode 1`] = `
+<p>
+  1
+</p>
+`;
 
-exports[`JSX should render JSX 1`] = `
+exports[`JSXRenderer should catch error of syntax 1`] = `"[1:11]: Unexpected token"`;
+
+exports[`JSXRenderer should catch error with number object 1`] = `"1"`;
+
+exports[`JSXRenderer should catch error with object 1`] = `"[object Object]"`;
+
+exports[`JSXRenderer should render JSX 1`] = `
 Array [
   "
       ",

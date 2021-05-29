@@ -7,15 +7,14 @@ import { evalProgram } from './program';
 
 const meriyahForceOptions: Options = {
   module: true,
-  loc: true,
   jsx: true,
 };
 
 export const parse = (code: string, options: ParseOptions): ESTree.Program => {
-  const { meriyah, debug, forceExpression } = options || {};
+  const { meriyah, debug, forceExpression } = options;
 
   try {
-    const parserOptions = Object.assign({}, meriyah || {}, meriyahForceOptions);
+    const parserOptions = Object.assign({}, meriyah || {}, meriyahForceOptions, { loc: options.debug });
     debug && console.time('JSX parse');
     const program = parseModule(forceExpression ? `<>${code}</>` : code, parserOptions);
     return program;
@@ -32,9 +31,14 @@ type EvaluateFunction<T> = {
 export const evaluate: EvaluateFunction<JSXContext> = (program: ESTree.Program | string, options: ParseOptions & EvaluateOptions = {}): JSXContext => {
   if (typeof program === 'string') program = parse(program, options);
 
-  const context = new JSXContext(options || {});
-  evalProgram(program, context);
-  return context;
+  const context = new JSXContext(options);
+  try {
+    options.debug && console.time('JSX eval ');
+    evalProgram(program, context);
+    return context;
+  } finally {
+    options.debug && console.timeEnd('JSX eval ');
+  }
 };
 
 export const evaluateJSX: EvaluateFunction<JSXNode[]> = (program: ESTree.Program | string, options: ParseOptions & EvaluateOptions = {}): JSXNode[] => {

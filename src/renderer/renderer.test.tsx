@@ -4,7 +4,21 @@ import { JSXRenderer } from '.';
 import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';
 import { JSXFallbackComponent } from './renderer';
 
-describe('JSX', () => {
+describe('JSXRenderer', () => {
+  const mockConsoleError = jest.spyOn(global.console, 'error').mockImplementation();
+  const mockConsoleGroup = jest.spyOn(global.console, 'group').mockImplementation();
+  const mockConsoleGroupEnd = jest.spyOn(global.console, 'groupEnd').mockImplementation();
+  const mockConsoleTime = jest.spyOn(global.console, 'time').mockImplementation();
+  const mockConsoleTimeEnd = jest.spyOn(global.console, 'timeEnd').mockImplementation();
+
+  afterEach(() => {
+    mockConsoleError.mockClear();
+    mockConsoleGroup.mockClear();
+    mockConsoleGroupEnd.mockClear();
+    mockConsoleTime.mockClear();
+    mockConsoleTimeEnd.mockClear();
+  });
+
   it('should render JSX', () => {
     const tree = renderer
       .create(
@@ -118,5 +132,51 @@ describe('JSX', () => {
       word
     </p>,
   );
-  test('<p>{exception()}</p>', <div>{'[1:6] Hello'} is raised</div>);
+  test('<p>{exception()}</p>', <div>{'Hello'} is raised</div>);
+
+  it('should call console.error on debug mode', () => {
+    const tree = renderer.create(<JSXRenderer code="<span>{foo()}</span>" debug />).toJSON();
+    expect(tree).toMatchSnapshot();
+
+    expect(mockConsoleError).toHaveBeenCalledTimes(1);
+    expect(mockConsoleGroup).toHaveBeenCalledTimes(1);
+    expect(mockConsoleGroupEnd).toHaveBeenCalledTimes(1);
+    expect(mockConsoleTime).toHaveBeenCalledTimes(2);
+    expect(mockConsoleTimeEnd).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call console.group on debug mode', () => {
+    const tree = renderer.create(<JSXRenderer code="<p>{1}</p>" debug />).toJSON();
+    expect(tree).toMatchSnapshot();
+
+    expect(mockConsoleGroup).toHaveBeenCalledTimes(1);
+    expect(mockConsoleGroupEnd).toHaveBeenCalledTimes(1);
+    expect(mockConsoleTime).toHaveBeenCalledTimes(2);
+    expect(mockConsoleTimeEnd).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call refNodes with node list', () => {
+    const refNodes = jest.fn(() => {});
+    const { act } = renderer;
+    act(() => {
+      renderer.create(<JSXRenderer code="{1} is 1" refNodes={refNodes} />).toJSON();
+    });
+
+    expect(refNodes).toBeCalledWith([1, ' is 1']);
+  });
+
+  it('should call Fallback Component on parse error', () => {
+    const fallbackComponent = jest.fn(({ error }) => <>{error.message}</>);
+    const tree = renderer.create(<JSXRenderer code="{notFound()}" fallbackComponent={fallbackComponent} />).toJSON();
+    expect(tree).toMatchSnapshot();
+
+    expect(fallbackComponent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: '{notFound()}',
+        fallbackComponent,
+        error: expect.any(Error),
+      }),
+      {},
+    );
+  });
 });

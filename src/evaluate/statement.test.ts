@@ -22,7 +22,7 @@ describe('Statement', () => {
   const supported = (name: ESTree.Statement['type'], code: string, options: EvaluateOptions = {}, f?: (matcher: jest.Matchers<any>) => void) => {
     it(`should be supported:  ${name}`, () => {
       const e = expect(() => evaluate(code, { ...options, binding }));
-      f && f(e);
+      f ? f(e) : e.not.toThrow();
     });
   };
 
@@ -33,28 +33,28 @@ describe('Statement', () => {
   };
 
   supported('BlockStatement', '{ 1 }');
-  supported('BreakStatement', 'while(true) { break }');
+  supported('BreakStatement', 'for (;;) { break; }');
   notSupported('ClassDeclaration', 'class Foo {}');
   // notSupported('ClassExpression', 'export default class {}', { meriyah: { module: true }});
   supported('ContinueStatement', 'let i = 0; while (i < 1) { i++; continue }');
-  supported('DebuggerStatement', 'debugger');
-  supported('DoWhileStatement', 'do { break } while(true)');
+  supported('DebuggerStatement', 'debugger;');
+  supported('DoWhileStatement', 'do { break; } while(true)');
   supported('EmptyStatement', ';;;;;;;');
   notSupported('ExportAllDeclaration', 'export * from "mod";');
   supported('ExportDefaultDeclaration', 'export default {};');
-  supported('ExportNamedDeclaration', 'export { a };');
-  supported('ExpressionStatement', '1');
+  supported('ExportNamedDeclaration', 'const a = 1; export { a };');
+  supported('ExpressionStatement', '1 + 1;');
   supported('ForInStatement', 'for (const i in [1,2,3]) { break; }');
   supported('ForOfStatement', 'for (const i of [1,2,3]) { break; }');
   supported('ForStatement', 'for (let i = 0; i < 3; i++) { break; }');
   supported('FunctionDeclaration', 'function f() { }');
-  supported('IfStatement', 'if(true) { }');
-  supported('ImportDeclaration', 'import "mod";');
+  supported('IfStatement', 'if(true) { }; if(false) { } else { }');
+  notSupported('ImportDeclaration', 'import "mod";');
   supported('LabeledStatement', 'label: { 1 }');
   supported('ReturnStatement', '(() => { return 1; })()');
   supported('SwitchStatement', 'switch(1) { case 2: break }');
   supported('ThrowStatement', 'throw "test";', {}, (m) => m.toThrowError('test'));
-  supported('TryStatement', 'try { foo(); }');
+  supported('TryStatement', 'try { foo(); } catch(e) { }');
   supported('VariableDeclaration', 'const a = 1');
   supported('WhileStatement', 'while(1) { break; }');
   // notSupported('WithStatement', 'with(1) { foo() }');
@@ -91,7 +91,7 @@ describe('Statement', () => {
 
     const context = evaluate('for (let i = 0; i < 10; i++) { call(); if(i >= 9) { continue }; call(); }', { binding });
     expect(counter).toEqual(19);
-    expect(context.stacks.length).toStrictEqual(2);
+    expect(context.stackSize).toStrictEqual(2);
   });
 
   it('should run for of loop', () => {
@@ -104,7 +104,7 @@ describe('Statement', () => {
 
     const context = evaluate('for (const num of [1, 2, 3]) { call(num) }', { binding });
     expect(called).toStrictEqual([1, 2, 3]);
-    expect(context.stacks.length).toStrictEqual(2);
+    expect(context.stackSize).toStrictEqual(2);
   });
 
   it('should run for in loop', () => {
@@ -117,7 +117,7 @@ describe('Statement', () => {
 
     const context = evaluate('for (const num in [1, 2, 3]) { call(num) }', { binding });
     expect(called).toStrictEqual(['0', '1', '2']);
-    expect(context.stacks.length).toStrictEqual(2);
+    expect(context.stackSize).toStrictEqual(2);
   });
 
   it('should run switch', () => {
@@ -147,7 +147,7 @@ describe('Statement', () => {
       { binding },
     );
     expect(counter).toEqual(2);
-    expect(context.stacks.length).toStrictEqual(2);
+    expect(context.stackSize).toStrictEqual(2);
   });
 
   it('should support export', () => {
@@ -165,7 +165,7 @@ describe('Statement', () => {
     expect(context.exports.a).toEqual(1);
     expect(context.exports.b).toEqual(1);
     expect(context.exports.c).toEqual(3);
-    expect(context.stacks.length).toStrictEqual(2);
+    expect(context.stackSize).toStrictEqual(2);
   });
 
   it('should support while', () => {
@@ -178,7 +178,7 @@ describe('Statement', () => {
     const context = evaluate('let i = 0; while(i < 3 && call() >= 0) { call(); i++ }', { binding });
 
     expect(coutner).toEqual(6);
-    expect(context.stacks.length).toStrictEqual(2);
+    expect(context.stackSize).toStrictEqual(2);
   });
 
   it('should support do while', () => {
@@ -191,7 +191,7 @@ describe('Statement', () => {
     const context = evaluate('let i = 0; do { call(); i++ } while(i < 3 && call() > 0)', { binding });
 
     expect(coutner).toEqual(5);
-    expect(context.stacks.length).toStrictEqual(2);
+    expect(context.stackSize).toStrictEqual(2);
   });
 
   it('should support try catch finally', () => {
@@ -223,7 +223,7 @@ describe('Statement', () => {
 
     expect(coutner).toEqual(2);
     expect(error).toEqual('test');
-    expect(context.stacks.length).toEqual(2);
+    expect(context.stackSize).toEqual(2);
   });
 
   it('should support function', () => {
@@ -249,10 +249,10 @@ describe('Statement', () => {
     );
 
     expect(context.exports['i']).toEqual(1);
-    expect(context.stacks.length).toEqual(2);
+    expect(context.stackSize).toEqual(2);
   });
 
-  it('should support label', () => {
+  it('should support label with continue', () => {
     const logs = [];
     const binding = {
       log(line: string) {
@@ -267,10 +267,10 @@ describe('Statement', () => {
         for (i = 0; i < 3; i++) {
           loop2:
           for (j = 0; j < 3; j++) {
-              if (i === 1 && j === 1) {
-                continue loop1;
-              }
-              log('i = ' + i + ', j = ' + j);
+            if (i === 1 && j === 1) {
+              continue loop1;
+            }
+            log('i = ' + i + ', j = ' + j);
           }
         }
       `,
@@ -278,5 +278,139 @@ describe('Statement', () => {
     );
 
     expect(logs).toStrictEqual(['i = 0, j = 0', 'i = 0, j = 1', 'i = 0, j = 2', 'i = 1, j = 0', 'i = 2, j = 0', 'i = 2, j = 1', 'i = 2, j = 2']);
+  });
+
+  it('should support label with break', () => {
+    const logs = [];
+    const binding = {
+      log(line: string) {
+        logs.push(line);
+      },
+    };
+    evaluate(
+      `
+        var i, j;
+
+        loop1:
+        for (i = 0; i < 3; i++) {
+          loop2:
+          for (j = 0; j < 3; j++) {
+            if (i === 1 && j === 1) {
+              break loop1;
+            }
+            log('i = ' + i + ', j = ' + j);
+          }
+        }
+      `,
+      { binding },
+    );
+
+    expect(logs).toStrictEqual(['i = 0, j = 0', 'i = 0, j = 1', 'i = 0, j = 2', 'i = 1, j = 0']);
+  });
+
+  it('should support complex jump', () => {
+    const logs = [];
+    const binding = {
+      log(message: string) {
+        logs.push(message);
+      },
+    };
+
+    evaluate(
+      `
+        block: {
+          let whileCount = 0;
+          whileLabel: while (true) {
+            whileCount++;
+            log("while");
+
+            switch (whileCount) {
+              case 1:
+                continue whileLabel;
+              case 2:
+                continue;
+              case 3:
+                break whileLabel;
+            }
+          }
+
+          let doWhileCount = 0;
+          doWhileLabel: do {
+            doWhileCount++;
+            log("do while");
+
+            switch (doWhileCount) {
+              case 1:
+                continue doWhileLabel;
+              case 2:
+                continue;
+              case 3:
+                break doWhileLabel;
+            }
+          } while(true)
+
+          forLabel: for (let forCount = 0; forCount < 4; forCount++) {
+            log("for");
+
+            switch (forCount) {
+              case 0:
+                continue forLabel;
+              case 1:
+                continue;
+              case 2:
+                break forLabel;
+            }
+          }
+
+          forOf: for (const a of [1, 2, 3, 4]) {
+            log("for of " + a);
+
+            switch (a) {
+              case 1:
+                continue forOf;
+              case 2:
+                continue;
+              case 3:
+                break forOf;
+            }
+          }
+
+          forIn: for (const a in [1, 2, 3, 4]) {
+            log("for in " + a);
+
+            switch (a) {
+              case '0':
+                continue forIn;
+              case '1':
+                continue;
+              case '2':
+                break forIn;
+            }
+          }
+          break block;
+
+          log("not reached");
+        }
+      `,
+      { binding },
+    );
+
+    expect(logs).toStrictEqual([
+      'while',
+      'while',
+      'while',
+      'do while',
+      'do while',
+      'do while',
+      'for',
+      'for',
+      'for',
+      'for of 1',
+      'for of 2',
+      'for of 3',
+      'for in 0',
+      'for in 1',
+      'for in 2',
+    ]);
   });
 });

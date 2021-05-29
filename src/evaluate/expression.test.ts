@@ -2,7 +2,7 @@ import { ESTree } from 'meriyah';
 import { Binding } from '../types';
 import { JSXEvaluateError } from './error';
 import { evaluateJSX } from './evaluate';
-import { EvaluateOptions, ParseOptions } from './options';
+import { AnyFunction, EvaluateOptions, ParseOptions } from './options';
 
 describe('Expression', () => {
   const binding: Binding = {
@@ -47,8 +47,8 @@ describe('Expression', () => {
   supported('Identifier', 'name', 'rosylilly');
   // notSupported('Import', 'import test as "test";');
   notSupported('ImportExpression', 'import("test")');
-  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', props: { key: '1' }, children: ['test'], loc: { column: 3, line: 1 } });
-  supported('JSXFragment', '<>test</>', { type: 'fragment', props: { key: '1' }, children: ['test'], loc: { column: 3, line: 1 } });
+  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', props: { key: '1' }, children: ['test'], loc: undefined });
+  supported('JSXFragment', '<>test</>', { type: 'fragment', props: { key: '1' }, children: ['test'], loc: undefined });
   supported('JSXSpreadChild', '...[1, 2, 3]', { children: [1, 2, 3], props: { key: '1' }, type: 'fragment', loc: undefined });
   supported('Literal', '1.45', 1.45);
   supported('LogicalExpression', 'true && false || true', true);
@@ -168,5 +168,19 @@ describe('Expression', () => {
     expect(evaluateJSX('{(() => 1)()}', { disableCall: true })[0]).toBeUndefined();
     expect(evaluateJSX('{"hello".toString()}', { disableCall: true })[0]).toBeUndefined();
     expect(evaluateJSX('{new Date()}', { disableCall: true })[0]).toBeUndefined();
+  });
+
+  it('should avoid function call with allowed list', () => {
+    const allowedFunctions: AnyFunction[] = [''.toUpperCase];
+    expect(evaluateJSX('{"Hello"}', { allowedFunctions })[0]).toStrictEqual('Hello');
+    expect(evaluateJSX('{"Hello".toUpperCase()}', { allowedFunctions })[0]).toStrictEqual('HELLO');
+    expect(() => evaluateJSX('{"Hello".toLowerCase()}', { allowedFunctions })[0]).toThrowError('toLowerCase is not allowed function');
+  });
+
+  it('should avoid function call with denied list', () => {
+    const deniedFunctions: AnyFunction[] = [''.toLowerCase];
+    expect(evaluateJSX('{"Hello"}', { deniedFunctions })[0]).toStrictEqual('Hello');
+    expect(evaluateJSX('{"Hello".toUpperCase()}', { deniedFunctions })[0]).toStrictEqual('HELLO');
+    expect(() => evaluateJSX('{"Hello".toLowerCase()}', { deniedFunctions })[0]).toThrowError('toLowerCase is not allowed function');
   });
 });
