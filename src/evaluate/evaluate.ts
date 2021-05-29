@@ -2,7 +2,7 @@ import { ESTree, Options, parseModule } from 'meriyah';
 import { JSXNode } from '../types/node';
 import { JSXContext } from './context';
 import { evalJSXChild } from './expression';
-import { EvaluateOptions } from './options';
+import { EvaluateOptions, ParseOptions } from './options';
 import { evalProgram } from './program';
 
 const meriyahForceOptions: Options = {
@@ -11,8 +11,9 @@ const meriyahForceOptions: Options = {
   jsx: true,
 };
 
-export const parse = (code: string, forceExpression: boolean, options: EvaluateOptions = {}) => {
-  const { meriyah, debug } = options;
+export const parse = (code: string, options: ParseOptions): ESTree.Program => {
+  const { meriyah, debug, forceExpression } = options || {};
+
   try {
     const parserOptions = Object.assign({}, meriyah || {}, meriyahForceOptions);
     debug && console.time('JSX parse');
@@ -23,19 +24,22 @@ export const parse = (code: string, forceExpression: boolean, options: EvaluateO
   }
 };
 
-export const evaluate = (program: string | ESTree.Program, options: EvaluateOptions = {}) => {
-  if (typeof program === 'string') {
-    program = parse(program, false, options);
-  }
-  const context = new JSXContext(options);
+type EvaluateFunction<T> = {
+  (program: ESTree.Program, options?: EvaluateOptions): T;
+  (program: string, options?: ParseOptions & EvaluateOptions): T;
+};
+
+export const evaluate: EvaluateFunction<JSXContext> = (program: ESTree.Program | string, options: ParseOptions & EvaluateOptions = {}): JSXContext => {
+  if (typeof program === 'string') program = parse(program, options);
+
+  const context = new JSXContext(options || {});
   evalProgram(program, context);
   return context;
 };
 
-export const evaluateJSX = (program: string | ESTree.Program, options: EvaluateOptions = {}): JSXNode[] => {
-  if (typeof program === 'string') {
-    program = parse(program, true, options);
-  }
+export const evaluateJSX: EvaluateFunction<JSXNode[]> = (program: ESTree.Program | string, options: ParseOptions & EvaluateOptions = {}): JSXNode[] => {
+  if (typeof program === 'string') program = parse(program, { ...options, forceExpression: true });
+
   const [fragmentExpression] = program.body;
   if (!fragmentExpression || fragmentExpression.type !== 'ExpressionStatement') {
     return [];

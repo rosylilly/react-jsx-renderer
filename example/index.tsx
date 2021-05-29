@@ -82,7 +82,7 @@ const App = () => {
     [update],
   );
 
-  const fullOptions = {
+  const fullOptions: JSXRendererProps = {
     binding: {
       ...exampleBinding,
       now,

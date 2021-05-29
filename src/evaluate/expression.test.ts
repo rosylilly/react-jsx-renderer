@@ -2,7 +2,7 @@ import { ESTree } from 'meriyah';
 import { Binding } from '../types';
 import { JSXEvaluateError } from './error';
 import { evaluateJSX } from './evaluate';
-import { EvaluateOptions } from './options';
+import { EvaluateOptions, ParseOptions } from './options';
 
 describe('Expression', () => {
   const binding: Binding = {
@@ -20,13 +20,13 @@ describe('Expression', () => {
     nop: (...args) => args,
   };
 
-  const supported = (name: ESTree.Expression['type'], code: string, result: any, options: EvaluateOptions = {}) => {
+  const supported = (name: ESTree.Expression['type'], code: string, result: any, options: ParseOptions & EvaluateOptions = {}) => {
     it(`should be supported:  ${name}`, () => {
       expect(evaluateJSX(`{${code}}`, { ...options, binding })[0]).toStrictEqual(result);
     });
   };
 
-  const notSupported = (name: ESTree.Expression['type'], code: string, options: EvaluateOptions = {}) => {
+  const notSupported = (name: ESTree.Expression['type'], code: string, options: ParseOptions & EvaluateOptions = {}) => {
     it(`should not be supported: ${name}`, () => {
       expect(() => evaluateJSX(`{${code}}`, { ...options, binding })).toThrowError(JSXEvaluateError);
     });

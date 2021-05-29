@@ -2,9 +2,12 @@ import * as meriyah from 'meriyah';
 import { Options } from '../types';
 import { Binding, ComponentsBinding } from '../types/binding';
 
-export interface EvaluateOptions extends Options {
+export interface ParseOptions extends Options {
   meriyah?: meriyah.Options;
+  forceExpression?: boolean;
+}
 
+export interface EvaluateOptions extends Options {
   binding?: Binding;
   components?: ComponentsBinding;
 
