@@ -1,8 +1,10 @@
-import { evaluateJSX } from './evaluate';
+import { evaluate, evaluateJSX } from './evaluate';
 import { Binding, ComponentsBinding } from '../types/binding';
 import { FC } from 'react';
 
 describe('evaluateJSX', () => {
+  const mockConsoleTime = jest.spyOn(global.console, 'time').mockImplementation();
+  const mockConsoleTimeEnd = jest.spyOn(global.console, 'timeEnd').mockImplementation();
   const ComponentA: FC = ({ children }) => <>{children}</>;
   const ComponentB: FC = ({ children }) => <>{children}</>;
 
@@ -34,15 +36,34 @@ describe('evaluateJSX', () => {
     });
   };
 
+  afterEach(() => {
+    mockConsoleTime.mockClear();
+    mockConsoleTimeEnd.mockClear();
+  });
+
   test('hello', ['hello']);
   test('{}', [undefined]);
   test('{1}', [1]);
-  test('<hr />', [{ type: 'element', component: 'hr', props: { key: '1' }, children: [], loc: { column: 2, line: 1 } }]);
-  test('<p foo={string}>test</p>', [{ type: 'element', component: 'p', props: { key: '1', foo: 'string' }, children: ['test'], loc: { column: 2, line: 1 } }]);
+  test('<hr />', [{ type: 'element', component: 'hr', props: { key: '1' }, children: [], loc: undefined }]);
+  test('<p foo={string}>test</p>', [{ type: 'element', component: 'p', props: { key: '1', foo: 'string' }, children: ['test'], loc: undefined }]);
   test('{...[1, 2, 3]}', [{ type: 'fragment', props: { key: '1' }, children: [1, 2, 3], loc: undefined }]);
   test('{{ a: 1 }}', [{ a: 1 }]);
 
-  test('<xs:test>test</xs:test>', [{ type: 'element', component: 'xs:test', props: { key: '1' }, children: ['test'], loc: { column: 2, line: 1 } }]);
-  test('<A>test</A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'], loc: { column: 2, line: 1 } }]);
-  test('<components.A>test</components.A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'], loc: { column: 2, line: 1 } }]);
+  test('<xs:test>test</xs:test>', [{ type: 'element', component: 'xs:test', props: { key: '1' }, children: ['test'], loc: undefined }]);
+  test('<A>test</A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'], loc: undefined }]);
+  test('<components.A>test</components.A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'], loc: undefined }]);
+
+  it('should call console.time on debug mode', () => {
+    evaluate('const a = 1', { debug: true });
+
+    expect(mockConsoleTime).toHaveBeenCalledTimes(2);
+    expect(mockConsoleTimeEnd).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call console.time on debug mode(JSX)', () => {
+    evaluateJSX('<p>Hello</p>', { debug: true });
+
+    expect(mockConsoleTime).toHaveBeenCalledTimes(2);
+    expect(mockConsoleTimeEnd).toHaveBeenCalledTimes(2);
+  });
 });

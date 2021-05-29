@@ -43,7 +43,7 @@ const Renderer: VFC<JSXRendererProps> = (props: JSXRendererProps) => {
   }, [code, meriyah, debug]);
 
   useEffect(() => {
-    if (typeof refNodes === 'function') refNodes(nodes || []);
+    if (typeof refNodes === 'function') refNodes(nodes);
   }, [refNodes, program]);
 
   try {

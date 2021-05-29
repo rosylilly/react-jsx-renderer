@@ -1,6 +1,6 @@
 import { ESTree } from 'meriyah';
 import { Binding, ComponentsBinding } from '../types/binding';
-import { EvaluateOptions } from './options';
+import { EvaluateOptions, AnyFunction } from './options';
 
 class KeyGenerator {
   private readonly prefix: string;
@@ -53,10 +53,12 @@ class Variable {
 }
 
 class Stack {
+  public readonly parent: Stack | undefined;
   public readonly self: any;
   private variables: Map<string, Variable>;
 
-  constructor(self: any, init: Record<string, any> = {}) {
+  constructor(parent: Stack | undefined, self: any, init: Record<string, any>) {
+    this.parent = parent;
     this.self = self;
     this.variables = new Map();
     for (const [key, value] of Object.entries(init)) {
@@ -70,8 +72,8 @@ class Stack {
     return this.variables.has(name);
   }
 
-  public get(name: string): any {
-    return this.variables.get(name);
+  public get(name: string): Variable | undefined {
+    return this.variables.get(name) || (this.parent ? this.parent.get(name) : undefined);
   }
 
   public define(kind: VariableKind, name: string) {
@@ -80,7 +82,7 @@ class Stack {
 
   public set(name: string, value: any) {
     const variable = this.variables.get(name);
-    if (!variable) return;
+    if (!variable) return this.parent ? this.parent.set(name, value) : undefined;
     variable.value = value;
   }
 }
@@ -97,8 +99,9 @@ export class JSXContext {
   public readonly keyGenerator: KeyGenerator;
   public readonly binding: Binding;
   public readonly components: ComponentsBinding;
-  public readonly stacks: Stack[];
   public readonly exports: Record<string, any>;
+
+  public stack: Stack;
 
   constructor(options: EvaluateOptions) {
     this.options = options;
@@ -107,26 +110,26 @@ export class JSXContext {
     this.binding = options.binding || {};
     this.components = options.components || {};
 
-    this.stacks = [new Stack(undefined, systemVariables), new Stack(undefined, options.binding || {})];
+    this.stack = new Stack(new Stack(undefined, undefined, systemVariables), undefined, this.binding || {});
     this.exports = {};
   }
 
-  public get stack() {
-    return this.stacks[this.stacks.length - 1];
+  public get stackSize(): number {
+    const getStackSize = (stack: Stack, num: number): number => (stack.parent ? getStackSize(stack.parent, num) + 1 : num);
+
+    return getStackSize(this.stack, 1);
   }
 
   public pushStack(self: any) {
-    this.stacks.push(new Stack(self));
+    this.stack = new Stack(this.stack, self, {});
   }
 
   public popStack() {
-    this.stacks.pop();
+    this.stack = this.stack.parent as Stack;
   }
 
   public defineVariable(kind: VariableKind, name: string) {
-    if (this.stack) {
-      this.stack.define(kind, name);
-    }
+    this.stack.define(kind, name);
   }
 
   public setVariable(name: string, value: any) {
@@ -140,9 +143,8 @@ export class JSXContext {
     return this.stack ? this.stack.self : undefined;
   }
 
-  public resolveIdentifier(name: string): Variable {
-    const stack = this.stacks.find((stack) => stack.has(name));
-    return stack ? stack.get(name) : undefined;
+  public resolveIdentifier(name: string): Variable | undefined {
+    return this.stack.get(name);
   }
 
   public resolveComponent(name: string): any {
@@ -166,5 +168,21 @@ export class JSXContext {
 
   public set label(l: string | undefined) {
     this._label = l;
+  }
+
+  public isAllowedFunction(func: AnyFunction): boolean {
+    return !this.isDeniedFunc(func) && this.isAllowedFunc(func);
+  }
+
+  private isAllowedFunc(func: AnyFunction): boolean {
+    if (!this.options.allowedFunctions) return true;
+
+    const match = this.options.allowedFunctions.reduce((match, f) => match || f === func, false);
+    return match;
+  }
+
+  private isDeniedFunc(func: AnyFunction): boolean {
+    const match = (this.options.deniedFunctions || []).reduce((match, f) => match || f === func, false);
+    return match;
   }
 }

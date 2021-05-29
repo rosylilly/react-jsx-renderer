@@ -41,7 +41,7 @@ export class JSXBreak extends JSXError {
   public readonly label: string | undefined;
 
   constructor(label?: string) {
-    super('break');
+    super(`break${label ? ` ${label}` : ''}`);
     this.label = label;
 
     Object.defineProperty(this, 'name', { configurable: true, enumerable: false, value: this.constructor.name, writable: false });
@@ -61,7 +61,7 @@ export class JSXContinue extends JSXError {
   public readonly label: string | undefined;
 
   constructor(label?: string) {
-    super('continue');
+    super(`continue${label ? ` ${label}` : ''}`);
     this.label = label;
 
     Object.defineProperty(this, 'name', { configurable: true, enumerable: false, value: this.constructor.name, writable: false });

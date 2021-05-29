@@ -71,15 +71,17 @@ export const evalBlockStatement = (stmt: ESTree.BlockStatement, context: JSXCont
     try {
       evalStatement(child, context);
     } catch (err) {
-      if (err instanceof JSXBreak) {
-        if (err.isLabeled) {
-          if (err.label === label) {
-            break;
+      if (label) {
+        if (err instanceof JSXBreak) {
+          if (err.isLabeled) {
+            if (err.label === label) {
+              break;
+            } else {
+              throw err;
+            }
           } else {
-            throw err;
+            break;
           }
-        } else {
-          break;
         }
       }
       throw err;
@@ -313,11 +315,22 @@ export const evalForStatement = (stmt: ESTree.ForStatement, context: JSXContext)
   const update = () => {
     stmt.update && evalExpression(stmt.update, context);
   };
+
   for (init(); test(); update()) {
     try {
       evalStatement(stmt.body, context);
     } catch (err) {
-      if (err instanceof JSXContinue) {
+      if (err instanceof JSXBreak) {
+        if (err.isLabeled) {
+          if (err.label === label) {
+            break;
+          } else {
+            throw err;
+          }
+        } else {
+          break;
+        }
+      } else if (err instanceof JSXContinue) {
         if (err.isLabeled) {
           if (err.label === label) {
             continue;

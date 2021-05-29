@@ -227,13 +227,21 @@ export const evalCallExpression = (exp: ESTree.CallExpression, context: JSXConte
   if (context.options.disableCall) return undefined;
 
   try {
-    const { callee } = exp;
+    const callee = exp.callee as ESTree.Expression;
     const receiver = callee.type === 'MemberExpression' ? evalExpression(callee.object, context) : undefined;
+    const getName = (callee: ESTree.Expression | ESTree.PrivateIdentifier) => {
+      return callee.type === 'Identifier' ? callee.name : callee.type === 'MemberExpression' ? getName(callee.property) : null;
+    };
+
     const method = evalExpression(callee, context) as (...args: any[]) => any;
+
+    if (!context.isAllowedFunction(method)) {
+      throw new JSXEvaluateError(`${getName(callee) || 'f'} is not allowed function`, exp, context);
+    }
+
     const args = exp.arguments.map((arg) => evalExpression(arg, context));
 
     if (typeof method !== 'function') {
-      const getName = (callee) => (callee.type === 'Identifier' ? callee.name : callee.type === 'MemberExpression' ? getName(callee.property) : null);
       throw new JSXEvaluateError(`${getName(callee) || 'f'} is not a function`, exp, context);
     }
 
