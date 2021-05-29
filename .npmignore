@@ -3,11 +3,13 @@
 /.git
 /.github
 /coverage
-/dist/dev
 /dist/**/*.map
+/dist/dev
 /example
 /jest.config.js
 /node_modules
+/src/**/*.test.ts
+/src/**/*.test.tsx
 /tsconfig.json
 /webpack.config.mjs
 /yarn.lock
