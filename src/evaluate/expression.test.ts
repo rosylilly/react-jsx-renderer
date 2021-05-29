@@ -41,7 +41,7 @@ describe('Expression', () => {
   supported('CallExpression', '[1,2].join("-")', '1-2');
   supported('ChainExpression', 'test?.foo', undefined);
   // notSupported('ClassDeclaration', 'class {}');
-  notSupported('ClassExpression', 'class {}');
+  // supported('ClassExpression', 'class {}');
   supported('ConditionalExpression', 'true ? false ? 1 : 2 : 3', 2);
   // supported('FunctionExpression', 'function() { }');
   supported('Identifier', 'name', 'rosylilly');

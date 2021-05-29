@@ -1,95 +1,100 @@
 import { ESTree } from 'meriyah';
 import { JSXComponent, JSXElement, JSXFragment, JSXNode, JSXProperties, JSXText } from '../types/node';
-import { evalBindingPattern, setBinding } from './bind';
+import { evalArrayPattern, evalBindingPattern, evalObjectPattern, evalRestElement, setBinding } from './bind';
+import { evalClassDeclaration, evalClassExpression } from './class';
 import { JSXContext } from './context';
-import { JSXEvaluateError, JSXReturn, wrapJSXError } from './error';
-import { evalFunction } from './function';
-import { evalStatement } from './statement';
+import { evalMethodDefinition } from './definition';
+import { JSXEvaluateError, wrapJSXError } from './error';
+import { bindFunction, evalFunction } from './function';
 
 export const evalExpression = (exp: ESTree.Expression, context: JSXContext): any => {
-  switch (exp.type) {
-    case 'ArrayExpression':
-      return evalArrayExpression(exp, context);
-    case 'ArrayPattern':
-      return evalArrayPattern(exp, context);
-    case 'ArrowFunctionExpression':
-      return evalArrowFunctionExpression(exp, context);
-    case 'AssignmentExpression':
-      return evalAssignmentExpression(exp, context);
-    case 'AwaitExpression':
-      return evalAwaitExpression(exp, context);
-    case 'BinaryExpression':
-      return evalBinaryExpression(exp, context);
-    case 'CallExpression':
-      return evalCallExpression(exp, context);
-    case 'ChainExpression':
-      return evalChainExpression(exp, context);
-    case 'ClassDeclaration':
-      return evalClassDeclaration(exp, context);
-    case 'ClassExpression':
-      return evalClassExpression(exp, context);
-    case 'ConditionalExpression':
-      return evalConditionalExpression(exp, context);
-    case 'FunctionExpression':
-      return evalFunctionExpression(exp, context);
-    case 'Identifier':
-      return evalIdentifier(exp, context);
-    case 'Import':
-      return evalImport(exp, context);
-    case 'ImportExpression':
-      return evalImportExpression(exp, context);
-    case 'JSXClosingElement':
-      return evalJSXClosingElement(exp, context);
-    case 'JSXClosingFragment':
-      return evalJSXClosingFragment(exp, context);
-    case 'JSXElement':
-      return evalJSXElement(exp, context);
-    case 'JSXExpressionContainer':
-      return evalJSXExpressionContainer(exp, context);
-    case 'JSXFragment':
-      return evalJSXFragment(exp, context);
-    case 'JSXOpeningElement':
-      return evalJSXOpeningElement(exp, context);
-    case 'JSXOpeningFragment':
-      return evalJSXOpeningFragment(exp, context);
-    case 'JSXSpreadChild':
-      return evalJSXSpreadChild(exp, context);
-    case 'Literal':
-      return evalLiteral(exp, context);
-    case 'LogicalExpression':
-      return evalLogicalExpression(exp, context);
-    case 'MemberExpression':
-      return evalMemberExpression(exp, context);
-    case 'MetaProperty':
-      return evalMetaProperty(exp, context);
-    case 'NewExpression':
-      return evalNewExpression(exp, context);
-    case 'ObjectExpression':
-      return evalObjectExpression(exp, context);
-    case 'ObjectPattern':
-      return evalObjectPattern(exp, context);
-    case 'RestElement':
-      return evalRestElement(exp, context);
-    case 'SequenceExpression':
-      return evalSequenceExpression(exp, context);
-    case 'SpreadElement':
-      return evalSpreadElement(exp, context);
-    case 'Super':
-      return evalSuper(exp, context);
-    case 'TaggedTemplateExpression':
-      return evalTaggedTemplateExpression(exp, context);
-    case 'TemplateLiteral':
-      return evalTemplateLiteral(exp, context);
-    case 'ThisExpression':
-      return evalThisExpression(exp, context);
-    case 'UnaryExpression':
-      return evalUnaryExpression(exp, context);
-    case 'UpdateExpression':
-      return evalUpdateExpression(exp, context);
-    case 'YieldExpression':
-      return evalYieldExpression(exp, context);
-    default:
-      throw new JSXEvaluateError('Not implemented expression', exp, context);
+  try {
+    switch (exp.type) {
+      case 'ArrayExpression':
+        return evalArrayExpression(exp, context);
+      case 'ArrayPattern':
+        return evalArrayPattern(exp, context);
+      case 'ArrowFunctionExpression':
+        return evalArrowFunctionExpression(exp, context);
+      case 'AssignmentExpression':
+        return evalAssignmentExpression(exp, context);
+      case 'AwaitExpression':
+        return evalAwaitExpression(exp, context);
+      case 'BinaryExpression':
+        return evalBinaryExpression(exp, context);
+      case 'CallExpression':
+        return evalCallExpression(exp, context);
+      case 'ChainExpression':
+        return evalChainExpression(exp, context);
+      case 'ClassDeclaration':
+        return evalClassDeclaration(exp, context);
+      case 'ClassExpression':
+        return evalClassExpression(exp, context);
+      case 'ConditionalExpression':
+        return evalConditionalExpression(exp, context);
+      case 'FunctionExpression':
+        return evalFunctionExpression(exp, context);
+      case 'Identifier':
+        return evalIdentifier(exp, context);
+      case 'Import':
+        return evalImport(exp, context);
+      case 'ImportExpression':
+        return evalImportExpression(exp, context);
+      case 'JSXClosingElement':
+        return evalJSXClosingElement(exp, context);
+      case 'JSXClosingFragment':
+        return evalJSXClosingFragment(exp, context);
+      case 'JSXElement':
+        return evalJSXElement(exp, context);
+      case 'JSXExpressionContainer':
+        return evalJSXExpressionContainer(exp, context);
+      case 'JSXFragment':
+        return evalJSXFragment(exp, context);
+      case 'JSXOpeningElement':
+        return evalJSXOpeningElement(exp, context);
+      case 'JSXOpeningFragment':
+        return evalJSXOpeningFragment(exp, context);
+      case 'JSXSpreadChild':
+        return evalJSXSpreadChild(exp, context);
+      case 'Literal':
+        return evalLiteral(exp, context);
+      case 'LogicalExpression':
+        return evalLogicalExpression(exp, context);
+      case 'MemberExpression':
+        return evalMemberExpression(exp, context);
+      case 'MetaProperty':
+        return evalMetaProperty(exp, context);
+      case 'NewExpression':
+        return evalNewExpression(exp, context);
+      case 'ObjectExpression':
+        return evalObjectExpression(exp, context);
+      case 'ObjectPattern':
+        return evalObjectPattern(exp, context);
+      case 'RestElement':
+        return evalRestElement(exp, context);
+      case 'SequenceExpression':
+        return evalSequenceExpression(exp, context);
+      case 'SpreadElement':
+        return evalSpreadElement(exp, context);
+      case 'Super':
+        return evalSuper(exp, context);
+      case 'TaggedTemplateExpression':
+        return evalTaggedTemplateExpression(exp, context);
+      case 'TemplateLiteral':
+        return evalTemplateLiteral(exp, context);
+      case 'ThisExpression':
+        return evalThisExpression(exp, context);
+      case 'UnaryExpression':
+        return evalUnaryExpression(exp, context);
+      case 'UpdateExpression':
+        return evalUpdateExpression(exp, context);
+      case 'YieldExpression':
+        return evalYieldExpression(exp, context);
+      default:
+        throw new JSXEvaluateError('Not implemented expression', exp, context);
+    }
+  } catch (e) {
+    throw wrapJSXError(e, exp, context);
   }
 };
 
@@ -97,44 +102,9 @@ export const evalArrayExpression = (exp: ESTree.ArrayExpression, context: JSXCon
   return exp.elements.map((element) => (element ? evalExpression(element, context) : null));
 };
 
-export const evalArrayPattern = (exp: ESTree.ArrayPattern, context: JSXContext) => {
-  return exp.elements.map((element) => evalExpression(element, context));
-};
-
 export const evalArrowFunctionExpression = (exp: ESTree.ArrowFunctionExpression, context: JSXContext) => {
-  if (exp.async) {
-    throw new JSXEvaluateError('async function not supported', exp, context);
-  }
-
   const self = context.resolveThis();
-  const func = function (...args: any[]): any {
-    let retval: any;
-    context.pushStack(self);
-    exp.params.forEach((param, idx) => {
-      const bind = evalBindingPattern(param, context);
-      const val = args[idx] === undefined ? bind.default : args[idx];
-      setBinding(bind, val, context, 'let');
-    });
-
-    try {
-      switch (exp.body.type) {
-        case 'BlockStatement':
-          evalStatement(exp.body, context);
-          break;
-        default:
-          retval = evalExpression(exp.body, context);
-      }
-    } catch (err) {
-      if (err instanceof JSXReturn) {
-        retval = err.value;
-      } else {
-        throw err;
-      }
-    }
-
-    context.popStack();
-    return retval;
-  };
+  const func = bindFunction(evalFunction(exp, context)[1], self, context);
 
   return func;
 };
@@ -228,7 +198,7 @@ export const evalCallExpression = (exp: ESTree.CallExpression, context: JSXConte
 
   try {
     const callee = exp.callee as ESTree.Expression;
-    const receiver = callee.type === 'MemberExpression' ? evalExpression(callee.object, context) : undefined;
+    const receiver = callee.type === 'MemberExpression' ? evalExpression(callee.object, context) : context.resolveThis();
     const getName = (callee: ESTree.Expression | ESTree.PrivateIdentifier) => {
       return callee.type === 'Identifier' ? callee.name : callee.type === 'MemberExpression' ? getName(callee.property) : null;
     };
@@ -245,7 +215,10 @@ export const evalCallExpression = (exp: ESTree.CallExpression, context: JSXConte
       throw new JSXEvaluateError(`${getName(callee) || 'f'} is not a function`, exp, context);
     }
 
-    return method.call(receiver, ...args);
+    context.pushStack(receiver);
+    const retval = method.call(receiver, ...args);
+    context.popStack();
+    return retval;
   } catch (e) {
     throw wrapJSXError(e, exp, context);
   }
@@ -262,14 +235,6 @@ export const evalChainExpression = (exp: ESTree.ChainExpression, context: JSXCon
       return object ? evalMemberExpression(exp.expression, context) : undefined;
     }
   }
-};
-
-export const evalClassDeclaration = (exp: ESTree.ClassDeclaration, context: JSXContext) => {
-  throw new JSXEvaluateError('class is not supported', exp, context);
-};
-
-export const evalClassExpression = (exp: ESTree.ClassExpression, context: JSXContext) => {
-  throw new JSXEvaluateError('class is not supported', exp, context);
 };
 
 export const evalConditionalExpression = (exp: ESTree.ConditionalExpression, context: JSXContext) => {
@@ -323,9 +288,13 @@ export const evalMemberExpression = (exp: ESTree.MemberExpression, context: JSXC
   try {
     const { object, property } = exp;
 
+    const receiver = evalExpression(object, context);
     const key = property.type === 'Identifier' ? property.name : property.type === 'PrivateIdentifier' ? property.name : evalExpression(property, context);
 
-    return evalExpression(object, context)[key];
+    context.pushStack(receiver);
+    const retval = receiver[key];
+    context.popStack();
+    return retval;
   } catch (e) {
     throw wrapJSXError(e, exp, context);
   }
@@ -350,41 +319,9 @@ export const evalNewExpression = (exp: ESTree.NewExpression, context: JSXContext
 export const evalObjectExpression = (exp: ESTree.ObjectExpression, context: JSXContext) => {
   const object: Record<any, any> = {};
   exp.properties.forEach((property) => {
-    switch (property.type) {
-      case 'MethodDefinition':
-        evalMethodDefinition(property, context);
-        break;
-      case 'Property': {
-        const [key, value] = evalProperty(property, context);
-
-        switch (property.kind) {
-          case 'init':
-            object[key] = value;
-            break;
-          case 'get': // TODO: Implement here
-          case 'set': // TODO: Implement here
-        }
-        break;
-      }
-      case 'RestElement': {
-        Object.assign(object, evalRestElement(property, context));
-        break;
-      }
-      case 'SpreadElement': {
-        Object.assign(object, evalSpreadElement(property, context));
-        break;
-      }
-    }
+    evalObjectLiteralElementLike(object, property, context);
   });
   return object;
-};
-
-export const evalObjectPattern = (exp: ESTree.ObjectPattern, context: JSXContext) => {
-  return evalObjectExpression({ ...exp, type: 'ObjectExpression' }, context);
-};
-
-export const evalRestElement = (exp: ESTree.RestElement, context: JSXContext) => {
-  return evalExpression(exp.argument, context);
 };
 
 export const evalSequenceExpression = (exp: ESTree.SequenceExpression, context: JSXContext) => {
@@ -395,8 +332,9 @@ export const evalSpreadElement = (exp: ESTree.SpreadElement, context: JSXContext
   return evalExpression(exp.argument, context);
 };
 
-export const evalSuper = (exp: ESTree.Super, context: JSXContext) => {
-  throw new JSXEvaluateError('super is not supported', exp, context);
+export const evalSuper = (_: ESTree.Super, context: JSXContext) => {
+  const ctor = context.resolveThis().constructor;
+  return ctor.super;
 };
 
 export const evalTaggedTemplateExpression = (exp: ESTree.TaggedTemplateExpression, context: JSXContext) => {
@@ -421,8 +359,8 @@ export const evalTemplateLiteral = (exp: ESTree.TemplateLiteral, context: JSXCon
     .join('');
 };
 
-export const evalThisExpression = (exp: ESTree.ThisExpression, context: JSXContext) => {
-  throw new JSXEvaluateError('this is not supported', exp, context);
+export const evalThisExpression = (_: ESTree.ThisExpression, context: JSXContext) => {
+  return context.resolveThis();
 };
 
 export const evalUnaryExpression = (exp: ESTree.UnaryExpression, context: JSXContext) => {
@@ -464,11 +402,23 @@ export const evalYieldExpression = (exp: ESTree.YieldExpression, context: JSXCon
 
 // ObjectLiteralElementLike
 
-export const evalMethodDefinition = (exp: ESTree.MethodDefinition, context: JSXContext) => {
-  throw new JSXEvaluateError('method definition is not supported', exp, context);
+const evalObjectLiteralElementLike = (object: any, exp: ESTree.ObjectLiteralElementLike, context: JSXContext) => {
+  switch (exp.type) {
+    case 'MethodDefinition':
+      evalMethodDefinition(exp, context);
+      break;
+    case 'Property': {
+      evalProperty(object, exp, context);
+      break;
+    }
+    case 'SpreadElement': {
+      Object.assign(object, evalSpreadElement(exp, context));
+      break;
+    }
+  }
 };
 
-export const evalProperty = (exp: ESTree.Property, context: JSXContext) => {
+export const evalProperty = (object: any, exp: ESTree.Property, context: JSXContext) => {
   let key: any;
   if (exp.computed) {
     key = evalExpression(exp.key, context);
@@ -494,7 +444,17 @@ export const evalProperty = (exp: ESTree.Property, context: JSXContext) => {
     }
   })(exp.value);
 
-  return [key, value];
+  switch (exp.kind) {
+    case 'init':
+      object[key] = value;
+      break;
+    case 'get':
+      Object.defineProperty(object, key, { get: bindFunction(value, object, context) });
+      break;
+    case 'set':
+      Object.defineProperty(object, key, { set: bindFunction(value, object, context) });
+      break;
+  }
 };
 
 /// JSXChild
