@@ -6,9 +6,10 @@ import { RenderingOptions } from './options';
 const fileName = 'jsx';
 const unknownElementCache = new Map<string, boolean>();
 
-export const renderJSX = (node: JSXNode, options: RenderingOptions): ReactNode => {
+export const renderJSX = (node: JSXNode | JSXNode[], options: RenderingOptions): ReactNode | ReactNode[] => {
   if (node === null) return node;
   if (node === undefined) return node;
+  if (Array.isArray(node)) return node.map((n) => renderJSX(n, options));
 
   switch (typeof node) {
     case 'boolean':

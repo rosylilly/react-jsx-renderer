@@ -11,6 +11,8 @@ const Star: FC = ({ children }) => {
   return <p>***{children}***</p>;
 };
 
+const members = ['Ada', 'Bob', 'Chris'];
+
 const exampleHTML = `<div>
   <h1>Hello, World</h1>
   <p>Hi, I'm <b style={{ color: 'red' }}>Sho Kusano</b>.</p>
@@ -21,6 +23,8 @@ const exampleHTML = `<div>
 <Star>キラキラ</Star>
 <p>Now: {Date.now()}</p>
 <unknown>unknown element</unknown>
+
+<ul>{members.map((member) => <li>{member}</li>)}</ul>
 
 <h2>XSS Test</h2>
 <p>Look your console logs</p>
@@ -35,6 +39,7 @@ const exampleBinding = {
   number: 128,
   string: 'string',
   boolean: true,
+  members,
   Date,
 };
 
