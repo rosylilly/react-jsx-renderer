@@ -10,19 +10,145 @@
 
 A React Component for Rendering JSX.
 
+## Description
+
+React JSX Renderer is a React Component for rendering JSX to React nodes.
+
+It has a JavaScript Runtime inside, and can execute the user's JSX with controlled behavior.
+
+[Launch Demo](https://aduca.org/react-jsx-renderer/)
+
 ## Features
 
 - [x] Rendering JSX as React nodes
-- [x] Basic JavaScript syntax and featues
-  - Literal (Number, String, Boolean, Array, Object...)
-  - Call any methods
-  - Binary / Unary expressions
-  - Template literal
-  - and more...
+- [x] TypeScritpt ready
+- [x] Provides CommonJS and ES Modules
+- [x] JavaScript syntax and featues
+  - without async, await and generator
 - [x] Injectable custom React components
 - [x] Pass binding variables
 - [x] Applicable filters to parsed nodes
   - You can create allowlist / denylist filters to tagName, attributes or properties
+- [x] Avoid user's call expressions
+- [x] Avoid user's new expressions
+- [x] Parse with [meriyah](https://github.com/meriyah/meriyah)
+
+## Installation
+
+1. `npm install -s react-jsx-renderer` (or `yarn add react-jsx-renderer`)
+2. Add `import { JSXRenderer } from 'react-jsx-renderer';`
+3. `<JSXRenderer code="Hello, World" />` to render `Hello, World`
+
+## Options
+
+```typescript
+interface ParseOptions {
+  /**
+   * Options of parser
+   */
+  meriyah?: meriyah.Options;
+
+  /**
+   * When this option is enabled, always parse as an expression.
+   */
+  forceExpression?: boolean;
+}
+
+interface EvaluateOptions {
+  /**
+   * binding
+   */
+  binding?: Binding;
+
+  /**
+   * components
+   */
+  components?: ComponentsBinding;
+
+  /**
+   * Prefix of generated keys.
+   */
+  keyPrefix?: string;
+
+  /**
+   * When this option is enabled, no key will be generated
+   */
+  disableKeyGeneration?: boolean;
+
+  /**
+   * When this option is enabled, bindings will be excluded from the component search.
+   */
+  disableSearchCompontsByBinding?: boolean;
+
+  /**
+   * When this option is enabled, Call Expression and New Expression will always return undefined.
+   */
+  disableCall?: boolean;
+
+  /**
+   * When this option is enabled, New Expression will always return undefined.
+   */
+  disableNew?: boolean;
+
+  /**
+   * When this option is enabled, access to undefined variables will raise an exception.
+   */
+  raiseReferenceError?: boolean;
+
+  /**
+   * List of functions allowed to be executed.
+   *
+   * If empty, all functions will be allowed to execute.
+   */
+  allowedFunctions?: AnyFunction[];
+
+  /**
+   * List of functions denied to be executed.
+   *
+   * If empty, all functions will be allowed to execute.
+   */
+  deniedFunctions?: AnyFunction[];
+}
+
+interface RenderingOptions {
+  /**
+   * List of filters to be applied to elements.
+   */
+  elementFilters?: JSXElementFilter[];
+
+  /**
+   * List of filters to be applied to fragments.
+   */
+  fragmentFilters?: JSXFragmentFilter[];
+
+  /**
+   * List of filters to be applied to text nodes.
+   */
+  textFilters?: JSXTextFilter[];
+
+  /**
+   * When this option is enabled, non-existent HTML elements will not be rendered.
+   */
+  disableUnknownHTMLElement?: boolean;
+}
+
+interface RendererOptions extends {
+  /**
+   * JSX code
+   */
+  code?: string;
+
+  /**
+   * The component that will be displayed instead when an error occurs.
+   */
+  fallbackComponent?: JSXFallbackComponent;
+
+  /**
+   * If you want to receive the parsed result, set a Ref object to this option.
+   */
+  refNodes?: Ref<JSXNode[]>;
+}
+```
 
 ## Usage
 

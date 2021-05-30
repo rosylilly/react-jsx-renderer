@@ -2,8 +2,19 @@ import { Options } from '../types';
 import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';
 
 export interface RenderingOptions extends Options {
+  /**
+   * List of filters to be applied to elements.
+   */
   elementFilters?: JSXElementFilter[];
+
+  /**
+   * List of filters to be applied to fragments.
+   */
   fragmentFilters?: JSXFragmentFilter[];
+
+  /**
+   * List of filters to be applied to text nodes.
+   */
   textFilters?: JSXTextFilter[];
 
   /**

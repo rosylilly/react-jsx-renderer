@@ -8,8 +8,19 @@ import { renderJSX } from './render';
 export type JSXFallbackComponent = VFC<{ error: Error } & JSXRendererProps>;
 
 export interface JSXRendererProps extends ParseOptions, EvaluateOptions, RenderingOptions {
+  /**
+   * JSX code
+   */
   code?: string;
+
+  /**
+   * The component that will be displayed instead when an error occurs.
+   */
   fallbackComponent?: JSXFallbackComponent;
+
+  /**
+   * If you want to receive the parsed result, set a Ref object to this option.
+   */
   refNodes?: Ref<JSXNode[]>;
 }
 

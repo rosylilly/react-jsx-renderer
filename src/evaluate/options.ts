@@ -5,12 +5,26 @@ import { Binding, ComponentsBinding } from '../types/binding';
 export type AnyFunction = (...args: any[]) => any;
 
 export interface ParseOptions extends Options {
+  /**
+   * Options of parser
+   */
   meriyah?: meriyah.Options;
+
+  /**
+   * When this option is enabled, always parse as an expression.
+   */
   forceExpression?: boolean;
 }
 
 export interface EvaluateOptions extends Options {
+  /**
+   * binding
+   */
   binding?: Binding;
+
+  /**
+   * components
+   */
   components?: ComponentsBinding;
 
   /**
@@ -43,6 +57,17 @@ export interface EvaluateOptions extends Options {
    */
   raiseReferenceError?: boolean;
 
+  /**
+   * List of functions allowed to be executed.
+   *
+   * If empty, all functions will be allowed to execute.
+   */
   allowedFunctions?: AnyFunction[];
+
+  /**
+   * List of functions denied to be executed.
+   *
+   * If empty, all functions will be allowed to execute.
+   */
   deniedFunctions?: AnyFunction[];
 }
