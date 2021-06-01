@@ -40,8 +40,9 @@ jobs:
       - name: Run test with React@${{ matrix.react-version }} on ${{ matrix.env }}
         run: yarn test --env ${{ matrix.env }}
       - name: Send coverage
-        if: matrix.react-version == '17.0.0' && matrix.env == 'jsdom'
-        uses: coverallsapp/github-action@master
+        uses: codecov/codecov-action@v1
         with:
-          github-token: ${{ secrets.github_token }}
-          path-to-lcov: ${{ github.workspace }}/coverage/lcov.info
+          files: ./coverage/lcov.info
+          flags: react-${{ matrix.react-version }},env-${{ matrix.env }}
+          fail_ci_if_error: true
+          verbose: true
