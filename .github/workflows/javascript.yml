@@ -91,7 +91,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Build
-        run: yarn doc:build
+        run: yarn doc:build --public-url=/react-jsx-renderer/
         env:
           NODE_ENV: production
       - name: Deploy
