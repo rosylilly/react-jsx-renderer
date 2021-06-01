@@ -37,11 +37,21 @@ jobs:
         run: |
           node script/react-version.mjs ${{ matrix.react-version }}
           yarn install
-      - name: Run test
+      - name: Run test with React@${{ matrix.react-version }} on ${{ matrix.env }}
         run: yarn test --env ${{ matrix.env }}
-      - name: Send coverage to coveralls
-        if: matrix.react-version == '^17.0.0' && matrix.env == 'jsdom'
-        run: cat coverage/lcov.info | yarn run coveralls
-        env:
-          COVERALLS_REPO_TOKEN: "${{ secrets.COVERALLS_REPO_TOKEN }}"
-          COVERALLS_GIT_BRANCH: "${{ github.ref }}"
+      - name: Coveralls Parallel
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
+          flag-name: react-${{ matrix.react-version }}-env-${{ matrix.env }}
+          parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
+          parallel-finished: true
