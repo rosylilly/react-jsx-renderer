@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         env: ['jsdom', 'node']
-        react-version: [^16.0.0, ^17.0.0]
+        react-version: ['16.0.0', '17.0.0']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
             yarn-${{ runner.os }}-
       - name: Install dependencies - React ${{ matrix.react-version }}
         run: |
-          node script/react-version.mjs ${{ matrix.react-version }}
+          node script/react-version.mjs ^${{ matrix.react-version }}
           yarn install
       - name: Run test with React@${{ matrix.react-version }} on ${{ matrix.env }}
         run: yarn test --env ${{ matrix.env }}
