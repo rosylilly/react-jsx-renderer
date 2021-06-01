@@ -1,0 +1,46 @@
+name: test
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  jsdom:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        react-version: [^16.0.0, ^17.0.0]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Detect node version
+        id: node-version
+        run: echo "::set-output name=NODE_VERSION::$(cat .node-version)"
+      - name: Setup node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "${{ steps.node-version.outputs.NODE_VERSION }}"
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./node_modules
+          key: yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-${{ matrix.react-version }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-${{ matrix.react-version }}-${{ hashFiles('yarn.lock') }}
+            yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-${{ matrix.react-version }}-
+            yarn-${{ runner.os }}-
+      - name: Install dependencies - React ${{ matrix.react-version }}
+        run: |
+          node script/react-version.mjs ${{ matrix.react-version }}
+          yarn install
+      - name: Run test
+        run: yarn test
+      - name: Send coverage to coveralls
+        if: matrix.react-version == '^17.0.0'
+        run: cat coverage/lcov.info | yarn run coveralls
+        env:
+          COVERALLS_REPO_TOKEN: "${{ secrets.COVERALLS_REPO_TOKEN }}"
+          COVERALLS_GIT_BRANCH: "${{ github.ref }}"
