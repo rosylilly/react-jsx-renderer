@@ -2,9 +2,17 @@ import React, { ReactElement } from 'react';
 import renderer from 'react-test-renderer';
 import { JSXRenderer } from '.';
 import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';
-import { JSXFallbackComponent } from './renderer';
+import { JSXFallbackComponent, JSXRendererOptionsProvider } from './renderer';
+import { JSDOM } from 'jsdom';
 
 describe('JSXRenderer', () => {
+  if (global.document === undefined) {
+    // Node environment only
+    const { window } = new JSDOM();
+    global.window = window as any;
+    global.document = window.document;
+  }
+
   const mockConsoleError = jest.spyOn(global.console, 'error').mockImplementation();
   const mockConsoleGroup = jest.spyOn(global.console, 'group').mockImplementation();
   const mockConsoleGroupEnd = jest.spyOn(global.console, 'groupEnd').mockImplementation();
@@ -133,6 +141,14 @@ describe('JSXRenderer', () => {
     </p>,
   );
   test('<p>{exception()}</p>', <div>{'Hello'} is raised</div>);
+  test(
+    '<p>{["a", "b", "c"]}</p>',
+    <p>
+      {'a'}
+      {'b'}
+      {'c'}
+    </p>,
+  );
 
   it('should call console.error on debug mode', () => {
     const tree = renderer.create(<JSXRenderer code="<span>{foo()}</span>" debug />).toJSON();
@@ -178,5 +194,16 @@ describe('JSXRenderer', () => {
       }),
       {},
     );
+  });
+
+  it('should override with context', () => {
+    const tree = renderer
+      .create(
+        <JSXRendererOptionsProvider binding={{ hello: 'by context' }}>
+          <JSXRenderer code="{hello}" />
+        </JSXRendererOptionsProvider>,
+      )
+      .toJSON();
+    expect(tree).toMatchSnapshot();
   });
 });

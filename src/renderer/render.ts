@@ -1,10 +1,10 @@
 import { ESTree } from 'meriyah';
 import { createElement, Fragment, ReactNode } from 'react';
 import { JSXNode, JSXElement, JSXFragment, JSXText } from '../types';
+import { isUnknownHTMLElementTagName } from './isUnknownElementTagName';
 import { RenderingOptions } from './options';
 
 const fileName = 'jsx';
-const unknownElementCache = new Map<string, boolean>();
 
 export const renderJSX = (node: JSXNode | JSXNode[], options: RenderingOptions): ReactNode | ReactNode[] => {
   if (node === null) return node;
@@ -41,10 +41,8 @@ const renderJSXElement = (element: JSXElement, options: RenderingOptions): React
 
   if (options.disableUnknownHTMLElement && typeof filtered.component === 'string') {
     const { component } = filtered;
-    if (!unknownElementCache.has(component)) {
-      unknownElementCache.set(component, document.createElement(component) instanceof HTMLUnknownElement);
-    }
-    if (unknownElementCache.get(component)) return undefined;
+    const checker = options.isUnknownHTMLElementTagName || isUnknownHTMLElementTagName;
+    if (checker(component)) return undefined;
   }
 
   return createElement(

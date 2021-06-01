@@ -16,6 +16,8 @@ exports[`JSXRenderer should catch error with number object 1`] = `"1"`;
 
 exports[`JSXRenderer should catch error with object 1`] = `"[object Object]"`;
 
+exports[`JSXRenderer should override with context 1`] = `"by context"`;
+
 exports[`JSXRenderer should render JSX 1`] = `
 Array [
   "

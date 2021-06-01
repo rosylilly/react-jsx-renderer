@@ -1,5 +1,5 @@
 import { ESTree } from 'meriyah';
-import React, { memo, Ref, useEffect, useMemo, VFC } from 'react';
+import React, { createContext, FC, memo, Ref, useContext, useEffect, useMemo, VFC } from 'react';
 import { evaluateJSX, EvaluateOptions, parse, ParseOptions } from '../evaluate';
 import { JSXNode } from '../types';
 import { RenderingOptions } from './options';
@@ -24,6 +24,11 @@ export interface JSXRendererProps extends ParseOptions, EvaluateOptions, Renderi
   refNodes?: Ref<JSXNode[]>;
 }
 
+const JSXRendererContext = createContext<JSXRendererProps>({});
+export const JSXRendererOptionsProvider: FC<JSXRendererProps> = ({ children, ...props }) => {
+  return <JSXRendererContext.Provider value={props}>{children}</JSXRendererContext.Provider>;
+};
+
 const DefaultJSXFallbackComponent: JSXFallbackComponent = (props) => {
   const { error, debug } = props;
   debug && console.error(error);
@@ -33,7 +38,8 @@ const DefaultJSXFallbackComponent: JSXFallbackComponent = (props) => {
 DefaultJSXFallbackComponent.displayName = 'DefaultJSXFallbackComponent';
 
 const Renderer: VFC<JSXRendererProps> = (props: JSXRendererProps) => {
-  const { code, fallbackComponent, refNodes, ...options } = props;
+  const contextOptions = useContext(JSXRendererContext);
+  const { code, fallbackComponent, refNodes, ...options } = Object.assign({}, contextOptions, props);
   const { meriyah, debug } = options;
   const Fallback = fallbackComponent ? fallbackComponent : DefaultJSXFallbackComponent;
 
@@ -48,7 +54,7 @@ const Renderer: VFC<JSXRendererProps> = (props: JSXRendererProps) => {
     try {
       program = parse(code || '', { meriyah, debug, forceExpression: true });
     } catch (e) {
-      error = e instanceof Error ? e : new Error(e);
+      error = e;
     }
     return [program, error];
   }, [code, meriyah, debug]);
@@ -67,7 +73,7 @@ const Renderer: VFC<JSXRendererProps> = (props: JSXRendererProps) => {
       </>
     );
   } catch (err) {
-    const error = err instanceof Error ? err : new Error(err);
+    const error = err;
 
     return <Fallback {...props} error={error} />;
   } finally {

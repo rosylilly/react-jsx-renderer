@@ -1,5 +1,6 @@
 import { Options } from '../types';
 import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';
+import { UnknownHTMLElementTagNameFunction } from './isUnknownElementTagName';
 
 export interface RenderingOptions extends Options {
   /**
@@ -21,4 +22,6 @@ export interface RenderingOptions extends Options {
    * When this option is enabled, non-existent HTML elements will not be rendered.
    */
   disableUnknownHTMLElement?: boolean;
+
+  isUnknownHTMLElementTagName?: UnknownHTMLElementTagNameFunction;
 }

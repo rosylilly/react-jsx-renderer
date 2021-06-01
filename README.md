@@ -271,6 +271,34 @@ to:
 <p><a href="https://secure.url/redirect?url=https://github.com">github</a></p>
 ```
 
+### Provide options by context
+
+ex: Server side rendering.
+
+```javascript
+import { JSDOM } from 'jsdom';
+
+render(
+  <JSXRendererOptionsProvider isUnknownHTMLElement={(tagName) => {
+    const { window } = new JSDOM();
+    return window.document.createElement(tagName) instanceof window.HTMLUnknownElement;
+  }}>
+    <JSXRenderer
+      code={
+        '<p><unknown>Avoid</unknown></p>'
+      }
+    />
+  </JSXRendererOptionsProvider>,
+  root
+);
+```
+
+to:
+
+```html
+<p></p>
+```
+
 ## License
 
 [MIT License](https://github.com/rosylilly/react-jsx-renderer/blob/main/LICENSE)
