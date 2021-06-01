@@ -95,6 +95,8 @@ export class JSXContext {
   public readonly keyGenerator: KeyGenerator;
   public readonly binding: Binding;
   public readonly components: ComponentsBinding;
+  public readonly allowedFunctions: AnyFunction[];
+  public readonly deniedFunctions: AnyFunction[];
   public readonly exports: Record<string, any>;
 
   public stack: Stack;
@@ -105,6 +107,9 @@ export class JSXContext {
 
     this.binding = options.binding || {};
     this.components = options.components || {};
+
+    this.allowedFunctions = [...(options.allowedFunctions || [])];
+    this.deniedFunctions = [...(options.deniedFunctions || [])];
 
     this.stack = new Stack(new Stack(undefined, undefined, systemVariables), undefined, this.binding);
     this.exports = {};
@@ -168,14 +173,18 @@ export class JSXContext {
   }
 
   private isAllowedFunc(func: AnyFunction): boolean {
-    if (!this.options.allowedFunctions) return true;
+    if (this.allowedFunctions.length === 0) return true;
 
-    const match = this.options.allowedFunctions.reduce((match, f) => match || f === func, false);
+    const match = this.allowedFunctions.reduce((match, f) => match || f === func, false);
     return match;
   }
 
   private isDeniedFunc(func: AnyFunction): boolean {
-    const match = (this.options.deniedFunctions || []).reduce((match, f) => match || f === func, false);
+    const match = this.deniedFunctions.reduce((match, f) => match || f === func, false);
     return match;
+  }
+
+  public get hasAllowedFunctions(): boolean {
+    return this.allowedFunctions.length > 0;
   }
 }
