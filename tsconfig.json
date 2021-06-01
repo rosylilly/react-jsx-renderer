@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "allowJs": false,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "removeComments": true,
     "importHelpers": true,
     "downlevelIteration": true,
@@ -11,7 +11,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist/dts",
+    "outDir": "./dist",
+    "resolveJsonModule": true,
 
     "strict": false,
     "noImplicitAny": false,

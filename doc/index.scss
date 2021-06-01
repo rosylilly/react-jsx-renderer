@@ -1,0 +1,28 @@
+@import 'bulma/bulma.sass';
+@import 'codemirror/lib/codemirror.css';
+@import 'codemirror/theme/monokai.css';
+
+.table .table {
+  tr {
+    th {
+      padding-left: 0;
+    }
+    td {
+      padding-right: 0;
+    }
+  }
+
+  &.is-array, tfoot {
+    td {
+      padding-left: 0;
+    }
+  }
+
+  tbody {
+    tr:first-child {
+      td, th {
+        padding-top: 0;
+      }
+    }
+  }
+}

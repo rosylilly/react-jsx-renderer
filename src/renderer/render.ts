@@ -51,7 +51,6 @@ const renderJSXElement = (element: JSXElement, options: RenderingOptions): React
     filtered.component,
     {
       ...filtered.props,
-      __self: this,
       ...renderSourcePosition(element.loc, options),
     },
     ...filtered.children.map((child) => renderJSX(child, options)),
@@ -66,7 +65,6 @@ const renderJSXFragment = (fragment: JSXFragment, options: RenderingOptions): Re
       Fragment,
       {
         ...filtered.props,
-        __self: this,
         ...renderSourcePosition(fragment.loc, options),
       },
       ...filtered.children.map((child) => renderJSX(child, options)),

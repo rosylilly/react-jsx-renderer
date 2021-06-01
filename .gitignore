@@ -1,6 +1,7 @@
-.vscode
-.DS_Store
-/node_modules
-/dist
-/coverage
 *.log
+.DS_Store
+.parcel-cache
+.vscode
+coverage
+dist
+node_modules
