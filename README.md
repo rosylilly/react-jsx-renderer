@@ -2,7 +2,7 @@
 
 [![demo](https://img.shields.io/badge/LIVE%20DEMO-available-success)](https://aduca.org/react-jsx-renderer/)
 [![npm version](https://img.shields.io/npm/v/react-jsx-renderer.svg)](https://www.npmjs.org/package/react-jsx-renderer)
-[![Coverage Status](https://coveralls.io/repos/github/rosylilly/react-jsx-renderer/badge.svg?branch=main)](https://coveralls.io/github/rosylilly/react-jsx-renderer?branch=main)
+[![Coverage Status](https://codecov.io/gh/rosylilly/react-jsx-renderer/branch/main/graph/badge.svg?token=notleiwHZC)](https://codecov.io/gh/rosylilly/react-jsx-renderer)
 [![Dependencies Status](https://status.david-dm.org/gh/rosylilly/react-jsx-renderer.svg)](https://david-dm.org/rosylilly/react-jsx-renderer)
 [![Install size](https://packagephobia.com/badge?p=react-jsx-renderer)](https://packagephobia.com/result?p=react-jsx-renderer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
