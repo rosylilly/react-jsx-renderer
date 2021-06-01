@@ -1,0 +1,43 @@
+name: build
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Detect node version
+        id: node-version
+        run: echo "::set-output name=NODE_VERSION::$(cat .node-version)"
+      - name: Setup node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "${{ steps.node-version.outputs.NODE_VERSION }}"
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./node_modules
+          key: build-yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            build-yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+            build-yarn-${{ runner.os }}-${{ steps.node-version.outputs.NODE_VERSION }}-
+            build-yarn-${{ runner.os }}-
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn doc:build --public-url=/react-jsx-renderer/
+        env:
+          NODE_ENV: production
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
