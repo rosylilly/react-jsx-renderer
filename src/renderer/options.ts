@@ -23,5 +23,8 @@ export interface RenderingOptions extends Options {
    */
   disableUnknownHTMLElement?: boolean;
 
+  /**
+   * Function to determine Unknown HTML Element
+   */
   isUnknownHTMLElementTagName?: UnknownHTMLElementTagNameFunction;
 }

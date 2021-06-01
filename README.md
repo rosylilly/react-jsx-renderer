@@ -110,6 +110,11 @@ interface EvaluateOptions {
   allowedFunctions?: AnyFunction[];
 
   /**
+   * Add user-defined functions to the allowed list.
+   */
+  allowUserDefinedFunction?: boolean;
+
+  /**
    * List of functions denied to be executed.
    *
    * If empty, all functions will be allowed to execute.
@@ -137,6 +142,11 @@ interface RenderingOptions {
    * When this option is enabled, non-existent HTML elements will not be rendered.
    */
   disableUnknownHTMLElement?: boolean;
+
+  /**
+   * Function to determine Unknown HTML Element
+   */
+  isUnknownHTMLElementTagName?: UnknownHTMLElementTagNameFunction;
 }
 
 interface RendererOptions extends {

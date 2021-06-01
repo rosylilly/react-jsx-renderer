@@ -65,6 +65,11 @@ export interface EvaluateOptions extends Options {
   allowedFunctions?: AnyFunction[];
 
   /**
+   * Add user-defined functions to the allowed list.
+   */
+  allowUserDefinedFunction?: boolean;
+
+  /**
    * List of functions denied to be executed.
    *
    * If empty, all functions will be allowed to execute.

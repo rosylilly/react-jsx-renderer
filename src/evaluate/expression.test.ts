@@ -183,4 +183,18 @@ describe('Expression', () => {
     expect(evaluateJSX('{"Hello".toUpperCase()}', { deniedFunctions })[0]).toStrictEqual('HELLO');
     expect(() => evaluateJSX('{"Hello".toLowerCase()}', { deniedFunctions })[0]).toThrowError('toLowerCase is not allowed function');
   });
+
+  it('should automated allow function', () => {
+    const allowedFunctions = [String.prototype.toLowerCase, Array.prototype.map];
+    expect(evaluateJSX('{"Hello".toLowerCase()}', { allowedFunctions, allowUserDefinedFunction: true })[0]).toStrictEqual('hello');
+    expect(() => evaluateJSX('{"Hello".toUpperCase()}', { allowedFunctions, allowUserDefinedFunction: true })[0]).toThrowError('toUpperCase is not allowed function');
+    expect(evaluateJSX('{(() => "Hello")()}', { allowedFunctions, allowUserDefinedFunction: true })[0]).toStrictEqual('Hello');
+    expect(evaluateJSX('{(function() { return "Hello" })()}', { allowedFunctions, allowUserDefinedFunction: true })[0]).toStrictEqual('Hello');
+    expect(evaluateJSX('{["A", "B", "C"].map((char) => char.toLowerCase())}', { allowedFunctions, allowUserDefinedFunction: true })[0]).toStrictEqual(['a', 'b', 'c']);
+    expect(evaluateJSX('{["A", "B", "C"].map(function(char) { return char.toLowerCase() })}', { allowedFunctions, allowUserDefinedFunction: true })[0]).toStrictEqual([
+      'a',
+      'b',
+      'c',
+    ]);
+  });
 });

@@ -106,6 +106,10 @@ export const evalArrowFunctionExpression = (exp: ESTree.ArrowFunctionExpression,
   const self = context.resolveThis();
   const func = bindFunction(evalFunction(exp, context)[1], self, context);
 
+  if (context.options.allowUserDefinedFunction && context.hasAllowedFunctions) {
+    context.allowedFunctions.push(func);
+  }
+
   return func;
 };
 
@@ -249,7 +253,13 @@ export const evalConditionalExpression = (exp: ESTree.ConditionalExpression, con
 };
 
 export const evalFunctionExpression = (exp: ESTree.FunctionExpression, context: JSXContext) => {
-  return evalFunction(exp, context)[1];
+  const func = evalFunction(exp, context)[1];
+
+  if (context.options.allowUserDefinedFunction && context.hasAllowedFunctions) {
+    context.allowedFunctions.push(func);
+  }
+
+  return func;
 };
 
 export const evalIdentifier = (exp: ESTree.Identifier, context: JSXContext) => {
