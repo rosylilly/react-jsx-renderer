@@ -1,6 +1,6 @@
-import { evaluate, evaluateJSX } from './evaluate';
+import React, { FC } from 'react';
 import { Binding, ComponentsBinding } from '../types/binding';
-import { FC } from 'react';
+import { evaluate, evaluateJSX } from './evaluate';
 
 describe('evaluateJSX', () => {
   const mockConsoleTime = jest.spyOn(global.console, 'time').mockImplementation();

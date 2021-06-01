@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import renderer from 'react-test-renderer';
 import { JSXRenderer } from '.';
 import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';

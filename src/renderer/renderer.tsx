@@ -1,5 +1,5 @@
 import { ESTree } from 'meriyah';
-import { memo, Ref, useEffect, useMemo, VFC } from 'react';
+import React, { memo, Ref, useEffect, useMemo, VFC } from 'react';
 import { evaluateJSX, EvaluateOptions, parse, ParseOptions } from '../evaluate';
 import { JSXNode } from '../types';
 import { RenderingOptions } from './options';

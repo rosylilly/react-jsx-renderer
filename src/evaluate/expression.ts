@@ -225,15 +225,22 @@ export const evalCallExpression = (exp: ESTree.CallExpression, context: JSXConte
 };
 
 export const evalChainExpression = (exp: ESTree.ChainExpression, context: JSXContext) => {
-  switch (exp.expression.type) {
-    case 'CallExpression': {
-      const callee = evalExpression(exp.expression.callee, context);
-      return callee ? evalCallExpression(exp.expression, context) : undefined;
+  try {
+    switch (exp.expression.type) {
+      case 'CallExpression': {
+        const callee = evalExpression(exp.expression.callee, context);
+        return callee ? evalCallExpression(exp.expression, context) : undefined;
+      }
+      case 'MemberExpression': {
+        const object = evalExpression(exp.expression.object, context);
+        return object ? evalMemberExpression(exp.expression, context) : undefined;
+      }
     }
-    case 'MemberExpression': {
-      const object = evalExpression(exp.expression.object, context);
-      return object ? evalMemberExpression(exp.expression, context) : undefined;
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('is undefined')) {
+      return undefined;
     }
+    throw err;
   }
 };
 

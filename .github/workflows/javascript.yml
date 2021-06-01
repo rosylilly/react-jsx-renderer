@@ -91,7 +91,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Build
-        run: yarn build
+        run: yarn doc:build
         env:
           NODE_ENV: production
       - name: Deploy
@@ -99,4 +99,4 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/dev
+          publish_dir: ./dist
