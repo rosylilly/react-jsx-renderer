@@ -151,4 +151,30 @@ export const LiveDemos: Record<string, JSXRendererProps> = {
     code: '<p>before</p>\n<unknown>Unknown HTML Element</unknown>\n<p>after</p>',
     disableUnknownHTMLElement: true,
   },
+  'Allowed Functions': {
+    code: [
+      '<p>Allowed functions: String.toLowerCase(), Array.map(), Array.join()</p>',
+      '<p>{names.map((name) => name.toLowerCase()).join(", ")}</p>',
+      '<p>{names.map((name) => name.toUpperCase()).join(", ")}</p>',
+      '<p>{(() => "John".toLowerCase())()}</p>',
+    ].join('\n'),
+    binding: {
+      names: ['John', 'Gonbe', 'Richard', 'Alan'],
+    },
+    allowedFunctions: [String.prototype.toLowerCase, Array.prototype.map, Array.prototype.join],
+    allowUserDefinedFunction: true,
+  },
+  'Denied Functions': {
+    code: [
+      '<p>Denied functions: String.toLowerCase()</p>',
+      '<p>{names.map((name) => name.toLowerCase()).join(", ")}</p>',
+      '<p>{names.map((name) => name.toUpperCase()).join(", ")}</p>',
+      '<p>{(() => "John".toUpperCase())()}</p>',
+    ].join('\n'),
+    binding: {
+      names: ['John', 'Gonbe', 'Richard', 'Alan'],
+    },
+    deniedFunctions: [String.prototype.toLowerCase],
+    allowUserDefinedFunction: true,
+  },
 };

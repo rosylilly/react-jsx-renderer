@@ -209,15 +209,15 @@ export const evalCallExpression = (exp: ESTree.CallExpression, context: JSXConte
 
     const method = evalExpression(callee, context) as (...args: any[]) => any;
 
+    if (typeof method !== 'function') {
+      throw new JSXEvaluateError(`${getName(callee) || 'f'} is not a function`, exp, context);
+    }
+
     if (!context.isAllowedFunction(method)) {
       throw new JSXEvaluateError(`${getName(callee) || 'f'} is not allowed function`, exp, context);
     }
 
     const args = exp.arguments.map((arg) => evalExpression(arg, context));
-
-    if (typeof method !== 'function') {
-      throw new JSXEvaluateError(`${getName(callee) || 'f'} is not a function`, exp, context);
-    }
 
     context.pushStack(receiver);
     const retval = method.call(receiver, ...args);

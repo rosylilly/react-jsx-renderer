@@ -54,8 +54,10 @@ export const ObjectEditor: VFC<{ object: any; onChange: (obj: any) => void; expa
   if (obj === null) type = 'undefined';
 
   switch (type) {
-    case 'function':
-      return <input key="function" type="text" className="input is-static" readOnly defaultValue={`[Function]`} />;
+    case 'function': {
+      const name = obj.name ? `: ${obj.name}` : '';
+      return <input key="function" type="text" className="input is-static" readOnly defaultValue={`[Function${name}]`} />;
+    }
     case 'boolean':
       return (
         <button

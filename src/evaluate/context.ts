@@ -173,7 +173,7 @@ export class JSXContext {
   }
 
   private isAllowedFunc(func: AnyFunction): boolean {
-    if (this.allowedFunctions.length === 0) return true;
+    if (!this.hasAllowedFunctions) return true;
 
     const match = this.allowedFunctions.reduce((match, f) => match || f === func, false);
     return match;
@@ -185,6 +185,6 @@ export class JSXContext {
   }
 
   public get hasAllowedFunctions(): boolean {
-    return this.allowedFunctions.length > 0;
+    return !!this.options.allowedFunctions;
   }
 }
