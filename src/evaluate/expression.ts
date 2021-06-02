@@ -207,6 +207,8 @@ export const evalCallExpression = (exp: ESTree.CallExpression, context: JSXConte
       return callee.type === 'Identifier' ? callee.name : callee.type === 'MemberExpression' ? getName(callee.property) : null;
     };
 
+    if (exp.optional && receiver === undefined) return undefined;
+
     const method = evalExpression(callee, context) as (...args: any[]) => any;
 
     if (typeof method !== 'function') {
@@ -229,23 +231,7 @@ export const evalCallExpression = (exp: ESTree.CallExpression, context: JSXConte
 };
 
 export const evalChainExpression = (exp: ESTree.ChainExpression, context: JSXContext) => {
-  try {
-    switch (exp.expression.type) {
-      case 'CallExpression': {
-        const callee = evalExpression(exp.expression.callee, context);
-        return callee ? evalCallExpression(exp.expression, context) : undefined;
-      }
-      case 'MemberExpression': {
-        const object = evalExpression(exp.expression.object, context);
-        return object ? evalMemberExpression(exp.expression, context) : undefined;
-      }
-    }
-  } catch (err) {
-    if (err instanceof Error && err.message.includes('is undefined')) {
-      return undefined;
-    }
-    throw err;
-  }
+  return evalExpression(exp.expression, context);
 };
 
 export const evalConditionalExpression = (exp: ESTree.ConditionalExpression, context: JSXContext) => {
@@ -307,6 +293,8 @@ export const evalMemberExpression = (exp: ESTree.MemberExpression, context: JSXC
 
     const receiver = evalExpression(object, context);
     const key = property.type === 'Identifier' ? property.name : property.type === 'PrivateIdentifier' ? property.name : evalExpression(property, context);
+
+    if (exp.optional && receiver === undefined) return undefined;
 
     context.pushStack(receiver);
     const retval = receiver[key];
