@@ -40,6 +40,7 @@ describe('Expression', () => {
   supported('BinaryExpression', '1 + 1', 2);
   supported('CallExpression', '[1,2].join("-")', '1-2');
   supported('ChainExpression', 'test?.foo', undefined);
+  supported('ChainExpression', 'test?.()', undefined);
   // notSupported('ClassDeclaration', 'class {}');
   // supported('ClassExpression', 'class {}');
   supported('ConditionalExpression', 'true ? false ? 1 : 2 : 3', 2);
