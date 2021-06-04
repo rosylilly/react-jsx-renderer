@@ -1,15 +1,19 @@
 # React JSX Renderer
 
+[![npm (latest)](https://img.shields.io/npm/v/react-jsx-renderer/latest)](https://www.npmjs.org/package/react-jsx-renderer)
+[![npm (nightlyt)](https://img.shields.io/npm/v/react-jsx-renderer/nightly)](https://www.npmjs.com/package/react-jsx-renderer/v/nightly)
+
 [![demo](https://img.shields.io/badge/LIVE%20DEMO-available-success)](https://aduca.org/react-jsx-renderer/)
-[![npm version](https://img.shields.io/npm/v/react-jsx-renderer.svg)](https://www.npmjs.org/package/react-jsx-renderer)
 [![Coverage Status](https://codecov.io/gh/rosylilly/react-jsx-renderer/branch/main/graph/badge.svg?token=notleiwHZC)](https://codecov.io/gh/rosylilly/react-jsx-renderer)
 [![Dependencies Status](https://status.david-dm.org/gh/rosylilly/react-jsx-renderer.svg)](https://david-dm.org/rosylilly/react-jsx-renderer)
 [![Install size](https://packagephobia.com/badge?p=react-jsx-renderer)](https://packagephobia.com/result?p=react-jsx-renderer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[![latest](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/latest.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/latest.yml)
+[![nightly](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/nightly.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/nightly.yml)
+[![build](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/build.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/build.yml)
 [![test](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/test.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/test.yml)
 [![lint](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/lint.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/lint.yml)
-[![build](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/build.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/build.yml)
 
 A React Component for Rendering JSX.
 
