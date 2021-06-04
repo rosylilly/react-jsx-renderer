@@ -7,7 +7,7 @@
 [![Coverage Status](https://codecov.io/gh/rosylilly/react-jsx-renderer/branch/main/graph/badge.svg?token=notleiwHZC)](https://codecov.io/gh/rosylilly/react-jsx-renderer)
 [![Dependencies Status](https://status.david-dm.org/gh/rosylilly/react-jsx-renderer.svg)](https://david-dm.org/rosylilly/react-jsx-renderer)
 [![Install size](https://packagephobia.com/badge?p=react-jsx-renderer)](https://packagephobia.com/result?p=react-jsx-renderer)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/npm/l/react-jsx-renderer)](https://opensource.org/licenses/MIT)
 
 [![latest](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/latest.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/latest.yml)
 [![nightly](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/nightly.yml/badge.svg)](https://github.com/rosylilly/react-jsx-renderer/actions/workflows/nightly.yml)

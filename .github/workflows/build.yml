@@ -6,6 +6,8 @@ on:
     branches:
       - main
     paths:
+      - package.json
+      - yarn.lock
       - doc/**/*
       - src/**/*
 
