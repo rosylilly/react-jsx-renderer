@@ -5,6 +5,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.mjs'
 
 jobs:
   test:

@@ -1,10 +1,22 @@
 name: lint
 
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.mjs'
   push:
     branches:
       - main
+    paths:
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.mjs'
 
 jobs:
   lint:
