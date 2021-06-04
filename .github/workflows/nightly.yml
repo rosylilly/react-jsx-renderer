@@ -1,12 +1,15 @@
-name: release
+name: nightly
 
 on:
-  release:
-    types:
-      - created
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - src/**/*
 
 jobs:
-  latest:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,7 +34,11 @@ jobs:
             release-yarn-${{ runner.os }}-
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Set nightly version
+        run: node script/nightly.mjs
+        env:
+          TZ: 'Asia/Tokyo'
       - name: Publish package
-        run: npm publish --access public --tag latest
+        run: npm publish --access public --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
