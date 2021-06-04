@@ -43,6 +43,7 @@ jobs:
           publish_dir: ./dist
 
   nightly:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -70,3 +71,7 @@ jobs:
         run: node script/nightly.mjs
         env:
           TZ: 'Asia/Tokyo'
+      - name: Publish nightly package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
