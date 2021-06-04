@@ -46,7 +46,7 @@ const cjs = async () => {
 
 const esm = async () => {
   return compile('dist/index.mjs', {
-    target: ['esnext', 'node16'],
+    target: ['es2020', 'node16'],
     format: 'esm',
     plugins: [isProduction ? dtsPlugin({ outDir: './dist' }) : null].filter(Boolean),
   });
