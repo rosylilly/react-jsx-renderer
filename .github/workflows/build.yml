@@ -73,6 +73,6 @@ jobs:
         env:
           TZ: 'Asia/Tokyo'
       - name: Publish nightly package
-        run: npm publish --access public
+        run: npm publish --access public --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
