@@ -18,6 +18,7 @@ const external = [...dependencies, ...peerDependencies];
 /** @type {import('esbuild').BuildOptions} */
 const baseOptions = {
   entryPoints: ['./src/index.ts'],
+  mainFields: ['module', 'main'],
   bundle: true,
   platform: 'node',
   sourcemap: true,
@@ -40,11 +41,12 @@ const compile = async (/** @type string */ outfile, /** @type {import('esbuild')
 };
 
 const cjs = async () => {
-  return compile('dist/index.cjs', { format: 'cjs' });
+  return compile('dist/index.cjs', { target: ['es6', 'node14'], format: 'cjs' });
 };
 
 const esm = async () => {
   return compile('dist/index.mjs', {
+    target: ['esnext', 'node16'],
     format: 'esm',
     plugins: [isProduction ? dtsPlugin({ outDir: './dist' }) : null].filter(Boolean),
   });
