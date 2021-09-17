@@ -13,4 +13,5 @@ module.exports = {
   },
   moduleFileExtensions: ['tsx', 'ts', 'jsx', 'js', 'mjs'],
   testMatch: ['**/?(*.)+(spec|test).+(ts|tsx|js)'],
+  setupFilesAfterEnv: ['./script/jest/jsdom-polyfill.js'],
 };
