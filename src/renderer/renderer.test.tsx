@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { FC, ReactElement } from 'react';
 import renderer from 'react-test-renderer';
 import { JSXRenderer } from '.';
 import { JSXElementFilter, JSXFragmentFilter, JSXTextFilter } from './filter';
@@ -201,6 +201,52 @@ describe('JSXRenderer', () => {
       .create(
         <JSXRendererOptionsProvider binding={{ hello: 'by context' }}>
           <JSXRenderer code="{hello}" />
+        </JSXRendererOptionsProvider>,
+      )
+      .toJSON();
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('should render with custom component', () => {
+    const code = `
+      <Hello>World</Hello>
+    `;
+    const Hello: FC = ({ children }) => {
+      return <>Hello, {children}</>;
+    };
+    const tree = renderer
+      .create(
+        <JSXRendererOptionsProvider binding={{ hello: 'by context' }} components={{ Hello }}>
+          <JSXRenderer code={code} />
+        </JSXRendererOptionsProvider>,
+      )
+      .toJSON();
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('should render with component name', () => {
+    const code = `
+      export const B = function(){ return 'other function' };
+      export const Main = () => <>Hello, World: {hello} / {B()}</>;
+    `;
+    const tree = renderer
+      .create(
+        <JSXRendererOptionsProvider binding={{ hello: 'by context' }}>
+          <JSXRenderer code={code} component="Main" />
+        </JSXRendererOptionsProvider>,
+      )
+      .toJSON();
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('should render empty on non function component', () => {
+    const code = `
+      export const B = 'Hello'
+    `;
+    const tree = renderer
+      .create(
+        <JSXRendererOptionsProvider binding={{ hello: 'by context' }}>
+          <JSXRenderer code={code} component="B" />
         </JSXRendererOptionsProvider>,
       )
       .toJSON();

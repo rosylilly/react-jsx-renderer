@@ -53,3 +53,25 @@ Array [
   "Fragment",
 ]
 `;
+
+exports[`JSXRenderer should render empty on non function component 1`] = `null`;
+
+exports[`JSXRenderer should render with component name 1`] = `
+Array [
+  "Hello, World: ",
+  "by context",
+  " / ",
+  "other function",
+]
+`;
+
+exports[`JSXRenderer should render with custom component 1`] = `
+Array [
+  "
+      ",
+  "Hello, ",
+  "World",
+  "
+    ",
+]
+`;

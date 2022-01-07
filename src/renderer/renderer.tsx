@@ -1,6 +1,6 @@
 import { ESTree } from 'meriyah';
 import React, { createContext, FC, memo, Ref, useContext, useEffect, useMemo, VFC } from 'react';
-import { evaluateJSX, EvaluateOptions, parse, ParseOptions } from '../evaluate';
+import { evaluate, evaluateJSX, EvaluateOptions, parse, ParseOptions } from '../evaluate';
 import { JSXNode } from '../types';
 import { RenderingOptions } from './options';
 import { renderJSX } from './render';
@@ -21,6 +21,7 @@ const JSXNodeRenderer: VFC<JSXNodeRendererProps> = (props: JSXNodeRendererProps)
 JSXNodeRenderer.displayName = 'JSXNodeRenderer';
 
 export { JSXNodeRenderer };
+export { JSXRenderer };
 
 export interface JSXRendererProps extends ParseOptions, EvaluateOptions, Omit<JSXNodeRendererProps, 'nodes'> {
   /**
@@ -37,6 +38,16 @@ export interface JSXRendererProps extends ParseOptions, EvaluateOptions, Omit<JS
    * If you want to receive the parsed result, set a Ref object to this option.
    */
   refNodes?: Ref<JSXNode[]>;
+
+  /**
+   * Rendering Component name(optional)
+   */
+  component?: string;
+
+  /**
+   * Rendering component props(optional)
+   */
+  componentProps?: Record<string, any>;
 }
 
 export type JSXFallbackComponent = VFC<{ error: Error } & JSXRendererProps>;
@@ -51,7 +62,7 @@ DefaultJSXFallbackComponent.displayName = 'DefaultJSXFallbackComponent';
 
 const JSXRenderer: VFC<JSXRendererProps> = memo((props: JSXRendererProps) => {
   const contextOptions = useContext(JSXRendererContext);
-  const { code, fallbackComponent, refNodes, ...options } = Object.assign({}, contextOptions, props);
+  const { code, fallbackComponent, refNodes, component, componentProps, ...options } = Object.assign({}, contextOptions, props);
   const { meriyah, debug } = options;
   const Fallback = fallbackComponent ? fallbackComponent : DefaultJSXFallbackComponent;
 
@@ -61,7 +72,7 @@ const JSXRenderer: VFC<JSXRendererProps> = memo((props: JSXRendererProps) => {
 
   const [program, error] = useMemo<[ESTree.Program, undefined] | [undefined, Error]>(() => {
     try {
-      const program = parse(code || '', { meriyah, debug, forceExpression: true });
+      const program = parse(code || '', { meriyah, debug, forceExpression: !component });
       return [program, undefined];
     } catch (e) {
       const error = e as Error;
@@ -75,7 +86,17 @@ const JSXRenderer: VFC<JSXRendererProps> = memo((props: JSXRendererProps) => {
 
   try {
     if (program) {
-      nodes = evaluateJSX(program, options);
+      if (component) {
+        const { exports } = evaluate(program, options);
+        const comp = exports[component];
+        if (typeof comp === 'function') {
+          nodes = [{ type: 'fragment', props: {}, children: [comp(componentProps)] }];
+        } else {
+          nodes = [];
+        }
+      } else {
+        nodes = evaluateJSX(program, options);
+      }
     } else {
       throw error;
     }
@@ -90,8 +111,6 @@ const JSXRenderer: VFC<JSXRendererProps> = memo((props: JSXRendererProps) => {
   }
 });
 JSXRenderer.displayName = 'JSXRenderer';
-
-export { JSXRenderer };
 
 const JSXRendererContext = createContext<JSXRendererProps>({});
 
