@@ -8,13 +8,14 @@ import { evalProgram } from './program';
 const meriyahForceOptions: Options = {
   module: true,
   jsx: true,
+  loc: true,
 };
 
 export const parse = (code: string, options: ParseOptions): ESTree.Program => {
   const { meriyah, debug, forceExpression } = options;
 
   try {
-    const parserOptions = Object.assign({}, meriyah || {}, meriyahForceOptions, { loc: options.debug });
+    const parserOptions = Object.assign({}, meriyah || {}, meriyahForceOptions);
     debug && console.time('JSX parse');
     const program = parseModule(forceExpression ? `<>${code}</>` : code, parserOptions);
     return program;

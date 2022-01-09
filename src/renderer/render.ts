@@ -1,6 +1,7 @@
 import { ESTree } from 'meriyah';
 import { createElement, Fragment, ReactNode } from 'react';
-import { JSXNode, JSXElement, JSXFragment, JSXText } from '../types';
+import { AnyFunction } from '..';
+import { JSXElement, JSXFragment, JSXNode, JSXText } from '../types';
 import { isUnknownHTMLElementTagName } from './isUnknownElementTagName';
 import { RenderingOptions } from './options';
 
@@ -43,6 +44,14 @@ const renderJSXElement = (element: JSXElement, options: RenderingOptions): React
     const { component } = filtered;
     const checker = options.isUnknownHTMLElementTagName || isUnknownHTMLElementTagName;
     if (checker(component)) return undefined;
+  }
+
+  const component = filtered.component as AnyFunction;
+  if (typeof component === 'function') {
+    const props = { ...filtered.props };
+    let children = component(props);
+    if (!Array.isArray(children)) children = [children];
+    return createElement(Fragment, { ...renderSourcePosition(element.loc, options) }, ...children.map((child) => renderJSX(child, options)));
   }
 
   return createElement(

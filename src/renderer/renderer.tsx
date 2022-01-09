@@ -87,10 +87,9 @@ const JSXRenderer: VFC<JSXRendererProps> = memo((props: JSXRendererProps) => {
   try {
     if (program) {
       if (component) {
-        const { exports } = evaluate(program, options);
-        const comp = exports[component];
-        if (typeof comp === 'function') {
-          nodes = [{ type: 'fragment', props: {}, children: [comp(componentProps)] }];
+        const context = evaluate(program, options);
+        if (typeof context.exports[component] === 'function') {
+          nodes = [{ type: 'element', component: context.exports[component], props: componentProps || {}, children: [] }];
         } else {
           nodes = [];
         }

@@ -1,6 +1,6 @@
 import { ESTree } from 'meriyah';
 import { Binding, ComponentsBinding } from '../types/binding';
-import { EvaluateOptions, AnyFunction } from './options';
+import { AnyFunction, EvaluateOptions } from './options';
 
 class KeyGenerator {
   private readonly prefix: string;
@@ -146,6 +146,9 @@ export class JSXContext {
   }
 
   public resolveComponent(name: string): any {
+    const component = this.resolveIdentifier(name);
+    if (component) return component.value;
+
     const allComponents = Object.assign({}, this.options.disableSearchCompontsByBinding ? {} : this.binding, this.components);
 
     return name.split('.').reduce<any>((components, part) => {
