@@ -56,8 +56,8 @@
     "meriyah": "^4.1.5"
   },
   "devDependencies": {
-    "@parcel/transformer-inline-string": "2.0.0-nightly.690",
-    "@parcel/transformer-sass": "2.0.0-nightly.690",
+    "@parcel/transformer-inline-string": "^2.1.1",
+    "@parcel/transformer-sass": "^2.1.1",
     "@types/codemirror": "^5.60.0",
     "@types/jest": "^27.0.0",
     "@types/jsdom": "^16.2.10",
@@ -85,7 +85,7 @@
     "jsdom": "^17.0.0",
     "markdown-it": "^12.0.6",
     "markdown-it-task-lists": "^2.1.1",
-    "parcel": "^2.0.0-beta.3.1",
+    "parcel": "^2.1.1",
     "prettier": "^2.3.0",
     "prismjs": "^1.23.0",
     "react": ">=16.0.0",
