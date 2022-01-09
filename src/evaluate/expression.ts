@@ -1,4 +1,5 @@
 import { ESTree } from 'meriyah';
+import { ReactNode } from 'react';
 import { JSXComponent, JSXElement, JSXFragment, JSXNode, JSXProperties, JSXText } from '../types/node';
 import { evalArrayPattern, evalBindingPattern, evalObjectPattern, evalRestElement, setBinding } from './bind';
 import { evalClassDeclaration, evalClassExpression } from './class';
@@ -350,9 +351,19 @@ export const evalTaggedTemplateExpression = (exp: ESTree.TaggedTemplateExpressio
   return tag(quasis, ...expressions);
 };
 
+const getLocStart = (node: ESTree.Node) => {
+  if (node.loc) return node.loc.start;
+  return { line: 0, column: 0 };
+};
+
 export const evalTemplateLiteral = (exp: ESTree.TemplateLiteral, context: JSXContext) => {
   return [...exp.expressions, ...exp.quasis]
-    .sort((a, b) => (a.start || 0) - (b.start || 0))
+    .sort((a, b) => {
+      const aLoc = getLocStart(a);
+      const bLoc = getLocStart(b);
+      if (aLoc.line === bLoc.line) return aLoc.column - bLoc.column;
+      return aLoc.line - bLoc.line;
+    })
     .map((e) => {
       switch (e.type) {
         case 'TemplateElement':
@@ -479,7 +490,7 @@ export const evalJSXChild = (jsx: ESTree.JSXChild, context: JSXContext): JSXNode
   }
 };
 
-export const evalJSXElement = (jsx: ESTree.JSXElement, context: JSXContext): JSXElement => {
+export const evalJSXElement = (jsx: ESTree.JSXElement, context: JSXContext): JSXElement | ReactNode => {
   const { openingElement } = jsx;
   const [component, properties] = evalExpression(openingElement, context);
   const children = jsx.children.map((child) => evalJSXChild(child, context));
@@ -501,7 +512,7 @@ export const evalJSXEmptyExpression = (_jsx: ESTree.JSXEmptyExpression, _context
   return undefined;
 };
 
-export const evalJSXSpreadChild = (jsx: ESTree.JSXSpreadChild, context: JSXContext): JSXFragment | undefined => {
+export const evalJSXSpreadChild = (jsx: ESTree.JSXSpreadChild, context: JSXContext): JSXFragment | ReactNode | undefined => {
   const { expression } = jsx;
   const fragment = evalJSXFragment(
     {

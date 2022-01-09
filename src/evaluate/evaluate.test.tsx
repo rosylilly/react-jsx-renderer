@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { JSXNode } from '..';
 import { Binding, ComponentsBinding } from '../types/binding';
 import { evaluate, evaluateJSX } from './evaluate';
 
@@ -29,9 +30,17 @@ describe('evaluateJSX', () => {
     components,
   };
 
+  const removeLoc = (node: JSXNode): JSXNode => {
+    if (typeof node !== 'object') return node;
+    const { loc: _loc, children, ...rest } = node;
+
+    if (!children) return rest as JSXNode;
+    return { ...rest, children: children.map((node) => removeLoc(node)) };
+  };
+
   const test = (code: string, results: any[]) => {
     it(`should evaluate ${code}`, () => {
-      const actual = evaluateJSX(code, { binding, components });
+      const actual = evaluateJSX(code, { binding, components }).map((node) => removeLoc(node));
       expect(actual).toStrictEqual(results);
     });
   };
@@ -44,14 +53,14 @@ describe('evaluateJSX', () => {
   test('hello', ['hello']);
   test('{}', [undefined]);
   test('{1}', [1]);
-  test('<hr />', [{ type: 'element', component: 'hr', props: { key: '1' }, children: [], loc: undefined }]);
-  test('<p foo={string}>test</p>', [{ type: 'element', component: 'p', props: { key: '1', foo: 'string' }, children: ['test'], loc: undefined }]);
-  test('{...[1, 2, 3]}', [{ type: 'fragment', props: { key: '1' }, children: [1, 2, 3], loc: undefined }]);
+  test('<hr />', [{ type: 'element', component: 'hr', props: { key: '1' }, children: [] }]);
+  test('<p foo={string}>test</p>', [{ type: 'element', component: 'p', props: { key: '1', foo: 'string' }, children: ['test'] }]);
+  test('{...[1, 2, 3]}', [{ type: 'fragment', props: { key: '1' }, children: [1, 2, 3] }]);
   test('{{ a: 1 }}', [{ a: 1 }]);
 
-  test('<xs:test>test</xs:test>', [{ type: 'element', component: 'xs:test', props: { key: '1' }, children: ['test'], loc: undefined }]);
-  test('<A>test</A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'], loc: undefined }]);
-  test('<components.A>test</components.A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'], loc: undefined }]);
+  test('<xs:test>test</xs:test>', [{ type: 'element', component: 'xs:test', props: { key: '1' }, children: ['test'] }]);
+  test('<A>test</A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'] }]);
+  test('<components.A>test</components.A>', [{ type: 'element', component: ComponentA, props: { key: '1' }, children: ['test'] }]);
 
   it('should call console.time on debug mode', () => {
     evaluate('const a = 1', { debug: true });

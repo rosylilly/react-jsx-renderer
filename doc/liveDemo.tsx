@@ -177,4 +177,27 @@ export const LiveDemos: Record<string, JSXRendererProps> = {
     deniedFunctions: [String.prototype.toLowerCase],
     allowUserDefinedFunction: true,
   },
+  'Named Component': {
+    code: [
+      'const ListItem = ({ item }) => {',
+      '  console.log(`this is list item: ${item}`);',
+      '  return <li>item: {item}</li>;',
+      '};',
+      '',
+      'const List = ({ items }) => {',
+      '  console.log("this is list");',
+      '  return <ul>{items.map((item, idx) => <ListItem key={idx} item={item} />)}</ul>;',
+      '};',
+      '',
+      'export const Main = () => {',
+      '  console.log("this is main");',
+      '  const items = ["a", "b", "c"];',
+      '  return <List items={items} />;',
+      '};',
+    ].join('\n'),
+    binding: {
+      console,
+    },
+    component: 'Main',
+  },
 };

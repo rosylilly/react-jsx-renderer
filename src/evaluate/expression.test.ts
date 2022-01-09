@@ -48,8 +48,8 @@ describe('Expression', () => {
   supported('Identifier', 'name', 'rosylilly');
   // notSupported('Import', 'import test as "test";');
   notSupported('ImportExpression', 'import("test")');
-  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', props: { key: '1' }, children: ['test'], loc: undefined });
-  supported('JSXFragment', '<>test</>', { type: 'fragment', props: { key: '1' }, children: ['test'], loc: undefined });
+  supported('JSXElement', '<p>test</p>', { type: 'element', component: 'p', props: { key: '1' }, children: ['test'], loc: { column: 3, line: 1 } });
+  supported('JSXFragment', '<>test</>', { type: 'fragment', props: { key: '1' }, children: ['test'], loc: { column: 3, line: 1 } });
   supported('JSXSpreadChild', '...[1, 2, 3]', { children: [1, 2, 3], props: { key: '1' }, type: 'fragment', loc: undefined });
   supported('Literal', '1.45', 1.45);
   supported('LogicalExpression', 'true && false || true', true);
@@ -199,5 +199,9 @@ describe('Expression', () => {
       'b',
       'c',
     ]);
+  });
+
+  it('should valid template literal', () => {
+    expect(evaluateJSX('{((a, b) => `template: ${b} and ${a}`)("Hello", "World")}')[0]).toStrictEqual('template: World and Hello');
   });
 });
