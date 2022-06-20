@@ -141,6 +141,12 @@ describe('Expression', () => {
     const argRet = evaluateJSX('{((a) => a)(200)}')[0];
     expect(argRet).toStrictEqual(200);
 
+    const zeroRet = evaluateJSX('{((a) => a)(0)}')[0];
+    expect(zeroRet).toStrictEqual(0);
+
+    const undefinedRet = evaluateJSX('{((a) => a)()}')[0];
+    expect(undefinedRet).toStrictEqual(undefined);
+
     const stmtRet = evaluateJSX('{((a) => { return a + 100 })(200)}')[0];
     expect(stmtRet).toStrictEqual(300);
 
@@ -154,6 +160,12 @@ describe('Expression', () => {
 
     const expRet = evaluateJSX('{(function() { return 100 })()}')[0];
     expect(expRet).toStrictEqual(100);
+
+    const zeroRet = evaluateJSX('{(function (a) { return a })(0)}')[0];
+    expect(zeroRet).toStrictEqual(0);
+
+    const undefinedRet = evaluateJSX('{(function (a) { return a })()}')[0];
+    expect(undefinedRet).toStrictEqual(undefined);
 
     const argRet = evaluateJSX('{(function (a) { return a })(200)}')[0];
     expect(argRet).toStrictEqual(200);

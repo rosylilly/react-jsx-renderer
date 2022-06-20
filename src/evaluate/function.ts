@@ -19,7 +19,7 @@ export const evalFunction = (
     context.pushStack(context.resolveThis());
     exp.params.forEach((param) => {
       const bind = evalBindingPattern(param, context);
-      setBinding(bind, bind.type === 'Rest' ? args : args.shift() || bind.default, context, 'let');
+      setBinding(bind, bind.type === 'Rest' ? args : args.shift() ?? bind.default, context, 'let');
     });
 
     try {
